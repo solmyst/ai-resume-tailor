@@ -4,7 +4,7 @@ import { ResumeData } from '../App';
 import { apiService, ParsedResume } from '../services/api';
 
 interface FileUploadProps {
-  onUpload: (data: ResumeData) => void;
+  onUpload: (data: ResumeData, parsed?: ParsedResume) => void;
 }
 
 export function FileUpload({ onUpload }: FileUploadProps) {
@@ -43,7 +43,7 @@ export function FileUpload({ onUpload }: FileUploadProps) {
       };
 
       setIsProcessing(false);
-      onUpload(resumeData);
+      onUpload(resumeData, parsed);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to process resume');
       setIsProcessing(false);

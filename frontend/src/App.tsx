@@ -59,13 +59,7 @@ function App() {
     checkConnection();
   }, []);
 
-  const handleResumeUpload = (data: ResumeData) => {
-    setResumeData(data);
-    setCurrentStep('job-description');
-  };
-
-  // Store parsed resume data when available
-  const handleResumeUploadWithParsedData = (data: ResumeData, parsed?: ParsedResume) => {
+  const handleResumeUpload = (data: ResumeData, parsed?: ParsedResume) => {
     setResumeData(data);
     if (parsed) {
       setParsedResume(parsed);
@@ -76,17 +70,14 @@ function App() {
   const handleJobDescriptionSubmit = async (jd: JobDescription) => {
     setJobDescription(jd);
     setIsProcessing(true);
-    
     try {
       if (apiConnected && parsedResume) {
         // Use real API for job analysis and resume tailoring
         const analysis = await apiService.analyzeJob(jd.text);
         setJobAnalysis(analysis);
-        
         // Tailor the resume using AI
         const tailored = await apiService.tailorResume(parsedResume, analysis);
         setTailoredResume(tailored);
-        
         // Update resume data with tailored content
         const tailoredText = formatTailoredResume(tailored);
         const updatedResumeData = {
@@ -94,14 +85,11 @@ function App() {
           tailoredText: tailoredText
         };
         setResumeData(updatedResumeData);
-        
-        // Generate portfolio suggestions based on job requirements
-        const mockProjects: PortfolioProject[] = generatePortfolioSuggestions(analysis);
-        setPortfolioProjects(mockProjects);
+        setIsProcessing(false);
+        setCurrentStep('tailor'); // Only move to tailor step after tailoring is done
       } else {
         // Fallback to mock data if API is not available
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
         const tailoredResumeData = {
           ...resumeData!,
           tailoredText: resumeData!.originalText.replace(
@@ -112,32 +100,10 @@ function App() {
             jd.extractedSkills.slice(0, 3).join(', ')
           )
         };
-        
         setResumeData(tailoredResumeData);
-        
-        const mockProjects: PortfolioProject[] = [
-          {
-            name: "E-commerce Platform",
-            description: "Full-stack application matching the required tech stack",
-            technologies: jd.extractedSkills.slice(0, 4),
-            relevanceScore: 95,
-            githubUrl: "https://github.com/user/ecommerce",
-            liveUrl: "https://myecommerce.vercel.app"
-          },
-          {
-            name: "Task Management Dashboard",
-            description: "React-based dashboard with real-time updates",
-            technologies: jd.extractedSkills.slice(2, 5),
-            relevanceScore: 88,
-            githubUrl: "https://github.com/user/dashboard"
-          }
-        ];
-        
-        setPortfolioProjects(mockProjects);
+        setIsProcessing(false);
+        setCurrentStep('tailor');
       }
-      
-      setIsProcessing(false);
-      setCurrentStep('tailor');
     } catch (error) {
       console.error('Error processing job description:', error);
       setIsProcessing(false);
@@ -197,7 +163,7 @@ function App() {
   const steps = [
     { id: 'upload', title: 'Upload Resume', completed: !!resumeData },
     { id: 'job-description', title: 'Job Description', completed: !!jobDescription },
-    { id: 'tailor', title: 'AI Tailoring', completed: resumeData?.tailoredText !== resumeData?.originalText },
+    { id: 'tailor', title: 'AI Tailoring', completed: !!tailoredResume },
     { id: 'portfolio', title: 'Portfolio Match', completed: portfolioProjects.length > 0 },
     { id: 'export', title: 'Export & Save', completed: false }
   ];
@@ -205,29 +171,24 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <Header />
-      
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-6">
           <ApiStatus connected={apiConnected} className="justify-center" />
         </div>
-        
         <div className="mb-8">
           <ProgressSteps steps={steps} currentStep={currentStep} />
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-3">
             {currentStep === 'upload' && (
-              <FileUpload onUpload={handleResumeUpload} />
+              <FileUpload onUpload={(data, parsed) => handleResumeUpload(data, parsed)} />
             )}
-            
             {currentStep === 'job-description' && (
               <JobDescriptionInput 
                 onSubmit={handleJobDescriptionSubmit}
                 isProcessing={isProcessing}
               />
             )}
-            
             {currentStep === 'tailor' && resumeData && jobDescription && (
               <ResumeTailor
                 resumeData={resumeData}
@@ -235,7 +196,6 @@ function App() {
                 onNext={() => setCurrentStep('portfolio')}
               />
             )}
-            
             {currentStep === 'portfolio' && (
               <PortfolioSuggestions
                 projects={portfolioProjects}
@@ -243,12 +203,10 @@ function App() {
                 onNext={() => setCurrentStep('export')}
               />
             )}
-            
             {currentStep === 'export' && resumeData && (
               <ExportOptions resumeData={resumeData} />
             )}
           </div>
-
           <div className="lg:col-span-1">
             <Analytics 
               resumeData={resumeData}

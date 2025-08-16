@@ -1,5 +1,5 @@
 // API service for connecting to the backend
-const API_BASE_URL = 'http://localhost:8001';
+const API_BASE = "/api"; // Use Vite proxy for local dev
 
 export interface ParsedResume {
   name: string;
@@ -47,88 +47,41 @@ export interface TailoredResume {
   match_score: number;
 }
 
-class ApiService {
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
-    
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
+export const apiService = {
+  checkHealth: async () => {
+    const res = await fetch(`${API_BASE}/`);
+    if (!res.ok) throw new Error("API not healthy");
+    return res.json();
+  },
+  analyzeJob: async (text: string) => {
+    const res = await fetch(`${API_BASE}/analyze-job`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
     });
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.data || data;
-  }
-
-  async uploadResume(file: File): Promise<ParsedResume> {
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.detail || "Error analyzing job");
+    return result.data;
+  },
+  tailorResume: async (resume: any, analysis: any) => {
+    const res = await fetch(`${API_BASE}/tailor-resume`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ resume_data: resume, job_analysis: analysis }),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.detail || "Error tailoring resume");
+    return result.data;
+  },
+  uploadResume: async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-
-    const response = await fetch(`${API_BASE_URL}/upload-resume`, {
+    const res = await fetch(`${API_BASE}/upload-resume`, {
       method: 'POST',
       body: formData,
     });
-
-    if (!response.ok) {
-      throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.data;
-  }
-
-  async analyzeJob(jobText: string): Promise<JobAnalysis> {
-    return this.request<JobAnalysis>('/analyze-job', {
-      method: 'POST',
-      body: JSON.stringify({ text: jobText }),
-    });
-  }
-
-  async tailorResume(resumeData: ParsedResume, jobAnalysis: JobAnalysis): Promise<TailoredResume> {
-    return this.request<TailoredResume>('/tailor-resume', {
-      method: 'POST',
-      body: JSON.stringify({
-        resume_data: resumeData,
-        job_analysis: jobAnalysis,
-      }),
-    });
-  }
-
-  async generatePDF(tailoredResume: TailoredResume): Promise<{ pdf_path: string; download_url: string }> {
-    return this.request<{ pdf_path: string; download_url: string }>('/generate-pdf', {
-      method: 'POST',
-      body: JSON.stringify(tailoredResume),
-    });
-  }
-
-  async downloadPDF(filename: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/download-pdf/${filename}`);
-    
-    if (!response.ok) {
-      throw new Error(`Download failed: ${response.status} ${response.statusText}`);
-    }
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-  }
-
-  async checkHealth(): Promise<{ message: string; status: string }> {
-    return this.request<{ message: string; status: string }>('/');
-  }
-}
-
-export const apiService = new ApiService();
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.detail || 'Error uploading resume');
+    return result.data;
+  },
+};
