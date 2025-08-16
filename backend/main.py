@@ -18,7 +18,7 @@ app = FastAPI(title="AI Resume Tailor", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for demo
+    allow_origins=["http://localhost:5173", "http://localhost:3000", "*"],  # Vite dev server + React dev server
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -105,6 +105,6 @@ async def download_pdf(filename: str):
 if __name__ == "__main__":
     import uvicorn
     print("🚀 Starting AI Resume Tailor API...")
-    print("📝 API Documentation: http://localhost:8000/docs")
-    print("🔗 Health Check: http://localhost:8000/")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    print("📝 API Documentation: http://localhost:8001/docs")
+    print("🔗 Health Check: http://localhost:8001/")
+    uvicorn.run(app, host="0.0.0.0", port=8001)

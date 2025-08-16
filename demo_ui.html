@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Tailor - UI Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .stepper {
+            display: flex;
+            justify-content: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 0 20px;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #1976d2;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .step.inactive .step-number {
+            background: #ccc;
+        }
+        
+        .step-label {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .step.inactive .step-label {
+            color: #999;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #1976d2;
+            border-radius: 15px;
+            padding: 60px;
+            text-align: center;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            background: #e3f2fd;
+            border-color: #1565c0;
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            color: #1976d2;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .upload-subtext {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #1565c0;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #1976d2;
+            color: #1976d2;
+        }
+        
+        .btn-outline:hover {
+            background: #1976d2;
+            color: white;
+        }
+        
+        .job-input {
+            width: 100%;
+            min-height: 300px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+        }
+        
+        .job-input:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .card h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .match-score {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: conic-gradient(#4caf50 0deg 306deg, #e0e0e0 306deg 360deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        
+        .score-circle::before {
+            content: '';
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+        }
+        
+        .score-text {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4caf50;
+            z-index: 1;
+        }
+        
+        .skill-tag {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin: 3px;
+            border: 1px solid #1976d2;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .demo-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .demo-note h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .demo-note p {
+            color: #856404;
+            margin: 5px 0;
+        }
+        
+        .feature-showcase {
+            display: none;
+        }
+        
+        .feature-showcase.active {
+            display: block;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Resume & Portfolio Tailor</h1>
+            <p>Automatically customize your resume for any job description using AI</p>
+        </div>
+        
+        <div class="stepper">
+            <div class="step active" id="step1">
+                <div class="step-number">1</div>
+                <div class="step-label">Upload Resume</div>
+            </div>
+            <div class="step inactive" id="step2">
+                <div class="step-number">2</div>
+                <div class="step-label">Job Description</div>
+            </div>
+            <div class="step inactive" id="step3">
+                <div class="step-number">3</div>
+                <div class="step-label">Tailored Results</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="demo-note">
+                <h4>🎯 Interactive UI Demo</h4>
+                <p>Click the buttons below to see different screens of the application</p>
+                <p>This shows exactly how the real application looks and works!</p>
+            </div>
+            
+            <!-- Step 1: Resume Upload -->
+            <div class="feature-showcase active" id="screen1">
+                <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Upload Your Resume</h2>
+                <div class="upload-area" onclick="showUploadDemo()">
+                    <div class="upload-icon">☁️</div>
+                    <div class="upload-text">Drag & drop your resume here</div>
+                    <div class="upload-subtext">or click to select a file</div>
+                    <button class="btn">Choose File</button>
+                    <div style="margin-top: 20px; font-size: 0.9rem; color: #666;">
+                        Supported formats: PDF, DOCX, TXT
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Job Description -->
+            <div class="feature-showcase" id="screen2">
+                <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Paste Job Description</h2>
+                <textarea class="job-input" placeholder="Paste the job description here...
+
+Example:
+Senior Full Stack Developer - Remote
+
+We are looking for a Senior Full Stack Developer to join our growing team.
+
+Requirements:
+• 5+ years of experience in full-stack development
+• Strong proficiency in React, Node.js, and TypeScript
+• Experience with cloud platforms (AWS preferred)
+• Knowledge of microservices architecture
+• Proficiency in SQL and NoSQL databases
+• Experience with Docker and Kubernetes
+• Strong understanding of CI/CD pipelines
+
+We offer competitive salary, remote work, and growth opportunities."></textarea>
+                
+                <div class="nav-buttons">
+                    <button class="btn btn-outline" onclick="showScreen(1)">Back</button>
+                    <button class="btn" onclick="showAnalyzing()">Analyze Job</button>
+                </div>
+            </div>
+            
+            <!-- Step 3: Results -->
+            <div class="feature-showcase" id="screen3">
+                <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Your Tailored Resume</h2>
+                
+                <div class="match-score">
+                    <div class="score-circle">
+                        <div class="score-text">87%</div>
+                    </div>
+                    <h3>Job Match Score</h3>
+                    <div style="width: 100%; height: 8px; background: #e0e0e0; border-radius: 4px; margin-top: 15px;">
+                        <div style="width: 87%; height: 100%; background: #4caf50; border-radius: 4px;"></div>
+                    </div>
+                </div>
+                
+                <div class="results-grid">
+                    <div class="card">
+                        <h3>📝 Tailored Professional Summary</h3>
+                        <p>Senior professional with extensive expertise in React, Node.js, TypeScript, AWS. Experienced software engineer with 5+ years of expertise in full-stack development, cloud technologies, and team leadership. Passionate about innovation, collaboration and delivering high-quality solutions.</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🎯 Recommended Skills to Highlight</h3>
+                        <div>
+                            <span class="skill-tag">React</span>
+                            <span class="skill-tag">Node.js</span>
+                            <span class="skill-tag">TypeScript</span>
+                            <span class="skill-tag">AWS</span>
+                            <span class="skill-tag">Docker</span>
+                            <span class="skill-tag">Kubernetes</span>
+                            <span class="skill-tag">PostgreSQL</span>
+                            <span class="skill-tag">MongoDB</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>💼 Key Job Requirements</h3>
+                        <div>
+                            <span class="skill-tag">Full-stack development</span>
+                            <span class="skill-tag">5+ years experience</span>
+                            <span class="skill-tag">Microservices</span>
+                            <span class="skill-tag">CI/CD</span>
+                            <span class="skill-tag">Cloud platforms</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🚀 Tailored Experience</h3>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Senior Software Engineer | Tech Solutions Inc | 2021-2024</strong>
+                            <p style="margin-top: 5px; color: #666; font-size: 0.9rem;">Led development of scalable web applications using modern technologies. Managed team of 5 developers and improved system performance by 40%. Utilized React for implementation. Utilized Node.js for implementation.</p>
+                        </div>
+                        <div>
+                            <strong>Software Developer | StartupCorp | 2019-2021</strong>
+                            <p style="margin-top: 5px; color: #666; font-size: 0.9rem;">Developed full-stack applications using React and Node.js. Implemented CI/CD pipelines and automated testing frameworks. Utilized TypeScript for implementation.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button class="btn btn-outline" onclick="showScreen(2)">Back</button>
+                    <div>
+                        <button class="btn btn-outline" style="margin-right: 10px;">🔄 Regenerate</button>
+                        <button class="btn">📥 Download PDF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showScreen(step) {
+            // Hide all screens
+            document.querySelectorAll('.feature-showcase').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show selected screen
+            document.getElementById('screen' + step).classList.add('active');
+            
+            // Update stepper
+            document.querySelectorAll('.step').forEach((stepEl, index) => {
+                if (index + 1 <= step) {
+                    stepEl.classList.remove('inactive');
+                    stepEl.classList.add('active');
+                } else {
+                    stepEl.classList.remove('active');
+                    stepEl.classList.add('inactive');
+                }
+            });
+        }
+        
+        function showUploadDemo() {
+            alert('📄 In the real app, you would upload your resume file here!\n\nSupported formats:\n• PDF files\n• Word documents (.docx)\n• Plain text files\n\nThe AI will automatically parse and extract your information.');
+            setTimeout(() => showScreen(2), 1000);
+        }
+        
+        function showAnalyzing() {
+            const btn = event.target;
+            btn.textContent = 'Analyzing...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                showScreen(3);
+                btn.textContent = 'Analyze Job';
+                btn.disabled = false;
+            }, 2000);
+        }
+        
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to cards
+            document.querySelectorAll('.card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -9,48 +9,37 @@ An intelligent application that automatically customizes resumes and portfolios 
 - 🎯 **AI-Powered Tailoring** - Match resume content to job requirements
 - 📊 **Match Scoring** - See how well your resume fits the job
 - 📋 **ATS-Optimized PDF** - Generate professional, ATS-friendly resumes
-- 🌐 **Web Interface** - Clean, intuitive user experience
+- 🌐 **Modern Web Interface** - Beautiful, responsive UI with Tailwind CSS
 
-## 🚀 Quick Start (One-Command Demo)
+## 🚀 Quick Start
 
+### Option 1: Full Application (Recommended)
 ```bash
-python start_demo.py
+# 1. Start the backend
+python run_project.py
+
+# 2. In a new terminal, start the frontend
+cd frontend
+npm install
+npm run dev
 ```
 
-This will:
-- ✅ Install all dependencies
-- 🚀 Start backend and frontend servers
-- 🌐 Open browser with the application
-- 🎯 Run a complete demo workflow
-- 📊 Show all features in action
+Then open: **http://localhost:5173**
 
-## 🛠️ Manual Setup
-
-### Backend Setup
+### Option 2: Backend Only (API Testing)
 ```bash
-# Install Python dependencies
-pip install -r backend/requirements.txt
-
-# Start the API server
-python backend/main.py
+python start_backend_only.py
 ```
 
-### Frontend Setup (Optional)
-```bash
-# Install Node.js dependencies
-cd frontend && npm install
+Then open: **http://localhost:8001/docs**
 
-# Start the React app
-npm start
-```
+## 🎯 Complete Workflow
 
-## 🎯 Demo Workflow
-
-1. **Upload Resume** - Drag & drop your resume file
+1. **Upload Resume** - Drag & drop your resume file (PDF, DOCX, TXT)
 2. **Paste Job Description** - Copy job posting text
-3. **AI Analysis** - System extracts key requirements
-4. **Resume Tailoring** - AI rewrites content to match job
-5. **Download PDF** - Get your optimized resume
+3. **AI Analysis** - System extracts key requirements and skills
+4. **Resume Tailoring** - AI rewrites content to match job requirements
+5. **Download PDF** - Get your ATS-optimized resume
 
 ## 📊 Example Results
 
@@ -62,29 +51,7 @@ Match Score: 87%
 ✅ ATS-Optimized: Professional formatting for applicant tracking systems
 ```
 
-## 🔧 API Endpoints
-
-- `POST /upload-resume` - Parse resume file
-- `POST /analyze-job` - Analyze job description
-- `POST /tailor-resume` - Generate tailored resume
-- `POST /generate-pdf` - Create ATS-optimized PDF
-- `GET /docs` - Interactive API documentation
-
-## 🌐 Access Points
-
-- **Frontend App**: http://localhost:3000
-- **API Server**: http://localhost:8000
-- **API Docs**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/
-
-## 🧪 Testing
-
-Run the demo script to test all functionality:
-```bash
-python demo.py
-```
-
-## 📁 Project Structure
+## 🏗️ Project Structure
 
 ```
 ai-resume-tailor/
@@ -94,38 +61,69 @@ ai-resume-tailor/
 │   │   └── services/       # Business logic
 │   ├── main.py            # API server
 │   └── requirements.txt   # Python dependencies
-├── frontend/               # React frontend
+├── frontend/               # Modern Vite + React + TypeScript
 │   ├── src/
 │   │   ├── components/    # React components
 │   │   └── services/      # API client
-│   └── package.json       # Node.js dependencies
-├── demo.py                # Demo script
-├── start_demo.py          # One-command demo
+│   ├── package.json       # Node.js dependencies
+│   └── vite.config.ts     # Vite configuration
+├── run_project.py         # Simple project runner
 └── README.md              # This file
 ```
 
 ## 🎨 Tech Stack
 
-- **Backend**: FastAPI, Python, Pydantic
-- **Frontend**: React, TypeScript, Material-UI
-- **NLP**: Advanced text processing and keyword extraction
-- **PDF**: ReportLab for professional document generation
-- **Deployment**: Docker-ready, cloud-compatible
+### Backend
+- **FastAPI** - Modern Python web framework
+- **Pydantic** - Data validation and serialization
+- **ReportLab** - PDF generation
+- **Advanced NLP** - Text processing and analysis
+
+### Frontend
+- **Vite** - Lightning-fast build tool
+- **React 18** - Modern React with hooks
+- **TypeScript** - Type-safe JavaScript
+- **Tailwind CSS** - Utility-first styling
+- **Lucide React** - Beautiful icons
+
+## 🔧 API Endpoints
+
+- `GET /` - Health check
+- `POST /upload-resume` - Parse resume file
+- `POST /analyze-job` - Analyze job description
+- `POST /tailor-resume` - Generate tailored resume
+- `POST /generate-pdf` - Create ATS-optimized PDF
+- `GET /docs` - Interactive API documentation
+
+## 🌐 Access Points
+
+- **Frontend App**: http://localhost:5173 (Vite dev server)
+- **Backend API**: http://localhost:8001
+- **API Docs**: http://localhost:8001/docs
+- **Health Check**: http://localhost:8001/
 
 ## 🔮 Advanced Features
 
-- **Semantic Matching**: Intelligent skill matching beyond keywords
-- **Industry Adaptation**: Tailoring based on job industry
-- **ATS Optimization**: Formatting optimized for applicant tracking systems
-- **Multi-format Support**: PDF, DOCX, and text resume parsing
-- **Real-time Processing**: Fast analysis and generation
+- **Real-time Processing** - Instant feedback and analysis
+- **Drag & Drop Upload** - Intuitive file handling
+- **Responsive Design** - Works on desktop, tablet, and mobile
+- **Error Handling** - Graceful fallbacks and user-friendly messages
+- **API Status Indicator** - Shows backend connection status
+- **Professional Styling** - Modern UI with smooth animations
+
+## 🧪 Testing
+
+Test the API endpoints:
+```bash
+python demo.py
+```
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test with `python demo.py`
+4. Test with `python run_project.py`
 5. Submit a pull request
 
 ## 📄 License
@@ -134,4 +132,4 @@ MIT License - feel free to use this project for personal or commercial purposes.
 
 ---
 
-**Ready to optimize your job applications? Run `python start_demo.py` and see the magic! ✨**
+**Ready to optimize your job applications? Run `python run_project.py` and start the frontend! ✨**
