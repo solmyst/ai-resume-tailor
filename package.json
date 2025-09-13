@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "deploy": "npm run build && gh-pages -d dist",
     "backend": "cd backend && python app.py",
     "setup-backend": "cd backend && python setup.py",
     "start": "concurrently \"npm run dev\" \"npm run backend\"",
