@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
-import { 
-  Upload, 
-  FileText, 
-  Briefcase, 
-  Download, 
-  ArrowLeft, 
+import {
+  Upload,
+  FileText,
+  Briefcase,
+  Download,
+  ArrowLeft,
   Sparkles,
   CheckCircle,
   Loader2,
   Eye,
   Edit3,
   Target,
-  Github
+  Github,
+  Save
 } from 'lucide-react';
+import jsPDF from 'jspdf';
+import ReactMarkdown from 'react-markdown';
 
 interface ResumeTailorProps {
   user: {
@@ -59,6 +62,33 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [jobDescText, setJobDescText] = useState('');
   const [jobUrl, setJobUrl] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedText, setEditedText] = useState('');
+
+  const handleUrlImport = async () => {
+    if (!jobUrl) return;
+
+    setIsProcessing(true);
+    try {
+      const response = await fetch('http://localhost:5000/api/analyze-job', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job_url: jobUrl })
+      });
+
+      if (!response.ok) throw new Error('Failed to import from URL');
+
+      const data = await response.json();
+      if (data.scraped_text) {
+        setJobDescText(data.scraped_text);
+      }
+      setIsProcessing(false);
+    } catch (error) {
+      console.error('Error importing URL:', error);
+      setIsProcessing(false);
+      alert('Failed to import job description from URL');
+    }
+  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -69,6 +99,7 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('userId', user.id);
 
       const response = await fetch('http://localhost:5000/api/upload-resume', {
         method: 'POST',
@@ -81,11 +112,11 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
       }
 
       const data = await response.json();
-      
+
       if (!data.success) {
         throw new Error('Resume processing failed');
       }
-      
+
       const resumeData: ResumeData = {
         originalText: data.resume_text,
         fileName: data.filename,
@@ -93,21 +124,16 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
         experience: data.extracted_data.general_skills || [],
         education: data.extracted_data.entities || []
       };
-      
+
       setResumeData(resumeData);
       setIsProcessing(false);
       setCurrentStep('job-description');
 
-      // Track resume upload activity
       try {
         await fetch(`http://localhost:5000/api/user/${user.id}/activity`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: `Resume uploaded: ${data.filename}`
-          }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: `Resume uploaded: ${data.filename}` }),
         });
       } catch (error) {
         console.error('Failed to track upload activity:', error);
@@ -128,12 +154,11 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
     try {
       const response = await fetch('http://localhost:5000/api/tailor-resume', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           resume_text: resumeData.originalText,
           job_description: jobDescText,
+          userId: user.id
         }),
       });
 
@@ -143,39 +168,37 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
       }
 
       const data = await response.json();
-      
+
       if (!data.success) {
         throw new Error('Resume tailoring failed');
       }
-      
+
       const jobDesc: JobDescription = {
         text: jobDescText,
-        company: data.job_analysis.company,
-        role: data.job_analysis.role,
-        requiredSkills: data.job_analysis.required_skills,
-        preferredSkills: data.job_analysis.preferred_skills
+        company: data.job_analysis.company || 'Unknown Company',
+        role: data.job_analysis.role || 'Unknown Role',
+        requiredSkills: data.job_analysis.required_skills || [],
+        preferredSkills: data.job_analysis.preferred_skills || []
       };
 
       const tailoredResume: TailoredResume = {
         tailoredText: data.tailored_resume,
-        matchScore: data.match_score,
-        addedKeywords: data.added_keywords,
-        suggestedProjects: data.suggested_projects,
-        atsOptimized: data.ats_optimized
+        matchScore: data.match_score || 0,
+        addedKeywords: data.added_keywords || [],
+        suggestedProjects: data.suggested_projects || [],
+        atsOptimized: data.ats_optimized || false
       };
 
       setJobDescription(jobDesc);
       setTailoredResume(tailoredResume);
+      setEditedText(data.tailored_resume);
       setIsProcessing(false);
       setCurrentStep('results');
 
-      // Track activity and match score
       try {
         await fetch(`http://localhost:5000/api/user/${user.id}/activity`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: `Resume tailored for ${jobDesc.role} at ${jobDesc.company}`,
             match_score: tailoredResume.matchScore
@@ -188,35 +211,41 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
       console.error('Error tailoring resume:', error);
       setIsProcessing(false);
       alert(`Failed to tailor resume: ${error.message}`);
-      setCurrentStep('job-description'); // Go back to job description step
+      setCurrentStep('job-description');
     }
   };
 
   const downloadPDF = async () => {
-    if (!tailoredResume) return;
+    if (!editedText) return;
 
     try {
-      // Create a formatted text file
-      const element = document.createElement('a');
-      const file = new Blob([tailoredResume.tailoredText], { type: 'text/plain' });
-      element.href = URL.createObjectURL(file);
-      element.download = `tailored-resume-${Date.now()}.txt`;
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
+      const doc = new jsPDF();
 
-      // Track download activity
+      // Split text into lines that fit the page width
+      const splitText = doc.splitTextToSize(editedText, 180);
+
+      let y = 20;
+      const pageHeight = doc.internal.pageSize.height;
+
+      splitText.forEach((line: string) => {
+        if (y > pageHeight - 20) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(line, 15, y);
+        y += 7;
+      });
+
+      doc.save(`tailored-resume-${Date.now()}.pdf`);
+
       await fetch(`http://localhost:5000/api/user/${user.id}/activity`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'Downloaded tailored resume'
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'Downloaded tailored resume (PDF)' }),
       });
     } catch (error) {
       console.error('Failed to download or track:', error);
+      alert('Failed to generate PDF');
     }
   };
 
@@ -280,9 +309,14 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
             placeholder="https://company.com/job-posting"
             className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
           />
-          <button className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+          <button
+            onClick={handleUrlImport}
+            disabled={!jobUrl || isProcessing}
+            className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+          >
             Import from URL
           </button>
+          {isProcessing && jobUrl && <p className="text-sm text-blue-600 mt-2">Importing...</p>}
         </div>
       </div>
 
@@ -339,8 +373,8 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
                   <span className="font-bold text-green-600">{tailoredResume?.matchScore}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-green-500 h-2 rounded-full" 
+                  <div
+                    className="bg-green-500 h-2 rounded-full"
                     style={{ width: `${tailoredResume?.matchScore}%` }}
                   ></div>
                 </div>
@@ -383,15 +417,33 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold">Tailored Resume</h3>
               <div className="flex space-x-3">
-                <button className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
-                  <Eye className="w-4 h-4 mr-2" />
-                  Preview
-                </button>
-                <button className="flex items-center px-4 py-2 text-blue-600 hover:text-blue-800 transition-colors">
-                  <Edit3 className="w-4 h-4 mr-2" />
-                  Edit
-                </button>
-                <button 
+                {isEditing ? (
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="flex items-center px-4 py-2 text-green-600 hover:text-green-800 transition-colors"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Preview
+                    </button>
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="flex items-center px-4 py-2 text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      <Edit3 className="w-4 h-4 mr-2" />
+                      Edit
+                    </button>
+                  </>
+                )}
+                <button
                   onClick={downloadPDF}
                   className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
@@ -400,11 +452,19 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
                 </button>
               </div>
             </div>
-            
-            <div className="bg-gray-50 rounded-lg p-6 max-h-96 overflow-y-auto">
-              <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">
-                {tailoredResume?.tailoredText}
-              </pre>
+
+            <div className="bg-gray-50 rounded-lg p-6 max-h-[600px] overflow-y-auto">
+              {isEditing ? (
+                <textarea
+                  value={editedText}
+                  onChange={(e) => setEditedText(e.target.value)}
+                  className="w-full h-[500px] p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                />
+              ) : (
+                <div className="prose max-w-none">
+                  <ReactMarkdown>{editedText}</ReactMarkdown>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -418,6 +478,8 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
             setJobDescription(null);
             setTailoredResume(null);
             setJobDescText('');
+            setEditedText('');
+            setIsEditing(false);
           }}
           className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
         >
@@ -439,16 +501,15 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
             <ArrowLeft className="w-5 h-5 mr-2" />
             Back to Dashboard
           </button>
-          
+
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               {['upload', 'job-description', 'processing', 'results'].map((step, index) => (
                 <div key={step} className="flex items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    currentStep === step ? 'bg-blue-600 text-white' :
-                    ['upload', 'job-description', 'processing', 'results'].indexOf(currentStep) > index ? 'bg-green-500 text-white' :
-                    'bg-gray-200 text-gray-600'
-                  }`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === step ? 'bg-blue-600 text-white' :
+                      ['upload', 'job-description', 'processing', 'results'].indexOf(currentStep) > index ? 'bg-green-500 text-white' :
+                        'bg-gray-200 text-gray-600'
+                    }`}>
                     {index + 1}
                   </div>
                   {index < 3 && <div className="w-8 h-0.5 bg-gray-200 mx-2"></div>}

@@ -15,9 +15,11 @@
     "install-backend": "cd backend && pip install -r requirements.txt"
   },
   "dependencies": {
+    "jspdf": "^3.0.4",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",

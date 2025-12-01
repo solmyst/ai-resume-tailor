@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, User } from 'lucide-react';
+import { X, Mail, Lock, User, Loader2 } from 'lucide-react';
 
 interface AuthModalProps {
   onClose: () => void;
@@ -8,25 +8,45 @@ interface AuthModalProps {
 
 export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuth }) => {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Mock authentication
-    const mockUser = {
-      id: '1',
-      name: formData.name || 'John Doe',
-      email: formData.email || 'john@example.com',
-      subscription: 'free' as const,
-      avatar: undefined
-    };
-    
-    onAuth(mockUser);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const endpoint = isSignUp ? '/api/auth/register' : '/api/auth/login';
+      const response = await fetch(`http://localhost:5000${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Authentication failed');
+      }
+
+      if (data.success && data.user) {
+        onAuth(data.user);
+      } else {
+        throw new Error('Invalid response from server');
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,6 +70,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuth }) => {
             <X className="w-6 h-6" />
           </button>
         </div>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {isSignUp && (
@@ -110,9 +136,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuth }) => {
 
           <button
             type="submit"
-            className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+            disabled={loading}
+            className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center"
           >
-            {isSignUp ? 'Create Account' : 'Sign In'}
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                Processing...
+              </>
+            ) : (
+              isSignUp ? 'Create Account' : 'Sign In'
+            )}
           </button>
         </form>
 
@@ -120,17 +154,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuth }) => {
           <p className="text-gray-600">
             {isSignUp ? 'Already have an account?' : "Don't have an account?"}
             <button
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError(null);
+              }}
               className="ml-2 text-blue-600 hover:text-blue-700 font-medium"
             >
               {isSignUp ? 'Sign In' : 'Sign Up'}
             </button>
-          </p>
-        </div>
-
-        <div className="mt-4 text-center">
-          <p className="text-xs text-gray-500">
-            Demo mode - any email/password will work
           </p>
         </div>
       </div>
