@@ -1,5 +1,5 @@
 import React from 'react';
-import { Brain, Target, FileText, MessageSquare, BarChart3, LogOut, User } from 'lucide-react';
+import { FileText, BarChart3, LogOut, User, Sparkles } from 'lucide-react';
 
 interface NavigationProps {
   user: {
@@ -21,32 +21,31 @@ export const Navigation: React.FC<NavigationProps> = ({ user, currentPage, onNav
   ];
 
   return (
-    <nav className="bg-white border-b border-slate-200 fixed top-0 left-0 right-0 z-50">
-      <div className="max-w-7xl mx-auto px-4">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#020617]/95 border-b border-white/5 mx-4 mt-4 rounded-2xl">
+      <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
-            <div className="relative">
-              <Brain className="h-8 w-8 text-blue-600" />
-              <Target className="h-4 w-4 text-purple-600 absolute -top-1 -right-1" />
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => onNavigate('dashboard')}>
+            <div className="bg-blue-600 p-1.5 rounded-lg shadow-lg shadow-blue-500/20">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-slate-900">AI Resume Tailor</h1>
-            </div>
+            <span className="text-xl font-black font-['Outfit'] tracking-tighter">
+              Resume<span className="text-blue-500">Tailor</span>AI
+            </span>
           </div>
 
           {/* Navigation Items */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden md:flex items-center space-x-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all font-bold text-sm ${
                     currentPage === item.id
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -57,31 +56,31 @@ export const Navigation: React.FC<NavigationProps> = ({ user, currentPage, onNav
           </div>
 
           {/* User Menu */}
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+          <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-3 group px-3 py-1.5 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/5 transition-colors cursor-default">
+              <div className="w-8 h-8 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/10">
                 {user.avatar ? (
-                  <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full" />
+                  <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-lg" />
                 ) : (
                   <User className="w-4 h-4 text-white" />
                 )}
               </div>
-              <div className="hidden md:block">
-                <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                <p className="text-xs text-gray-500 capitalize">{user.subscription} Plan</p>
+              <div className="hidden lg:block text-left">
+                <p className="text-xs font-black text-white leading-tight">{user.name}</p>
+                <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest">{user.subscription}</p>
               </div>
             </div>
             
             <button
               onClick={onLogout}
-              className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/5 rounded-xl transition-all active:scale-90"
+              title="Logout"
             >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden md:inline">Logout</span>
+              <LogOut className="w-5 h-5" />
             </button>
           </div>
         </div>
       </div>
     </nav>
   );
-};
+};

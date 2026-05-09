@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { X, Mail, Lock, User, Loader2, Sparkles } from 'lucide-react';
 
 interface AuthModalProps {
   onClose: () => void;
@@ -25,23 +25,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuth }) => {
       const endpoint = isSignUp ? '/api/auth/register' : '/api/auth/login';
       const response = await fetch(`http://localhost:5000${endpoint}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Authentication failed');
-      }
-
-      if (data.success && data.user) {
-        onAuth(data.user);
-      } else {
-        throw new Error('Invalid response from server');
-      }
+      if (!response.ok) throw new Error(data.error || 'Authentication failed');
+      onAuth(data.user);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -50,85 +40,88 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuth }) => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {isSignUp ? 'Create Account' : 'Sign In'}
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-[#020617]/80 backdrop-blur-xl" onClick={onClose} />
+      
+      <div className="glass-card max-w-md w-full p-10 relative overflow-hidden animate-in fade-in zoom-in duration-300">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50" />
+        
+        <button
+          onClick={onClose}
+          className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors"
+        >
+          <X className="w-6 h-6" />
+        </button>
+
+        <div className="text-center mb-10">
+          <div className="w-16 h-16 bg-blue-600/10 rounded-2xl flex items-center justify-center mx-auto mb-6 ring-1 ring-blue-500/20">
+            <Sparkles className="w-8 h-8 text-blue-500" />
+          </div>
+          <h2 className="text-3xl font-black mb-2 tracking-tight">
+            {isSignUp ? 'Join the Elite' : 'Welcome Back'}
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X className="w-6 h-6" />
-          </button>
+          <p className="text-slate-400 font-medium">
+            {isSignUp ? 'Start optimizing your career today.' : 'Sign in to access your dashboard.'}
+          </p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-sm font-bold flex items-center">
+            <div className="w-1 h-4 bg-red-500 rounded-full mr-3" />
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {isSignUp && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <User className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Full Name</label>
+              <div className="relative group">
+                <User className="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-blue-500 transition-colors" />
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter your full name"
+                  className="w-full glass-input pl-12"
+                  placeholder="John Doe"
                   required={isSignUp}
                 />
               </div>
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+          <div className="space-y-2">
+            <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Email Address</label>
+            <div className="relative group">
+              <Mail className="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-blue-500 transition-colors" />
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter your email"
+                className="w-full glass-input pl-12"
+                placeholder="name@company.com"
                 required
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
-            <div className="relative">
-              <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+          <div className="space-y-2">
+            <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Password</label>
+            <div className="relative group">
+              <Lock className="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-blue-500 transition-colors" />
               <input
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter your password"
+                className="w-full glass-input pl-12"
+                placeholder="••••••••"
                 required
               />
             </div>
@@ -137,34 +130,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuth }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center"
+            className="btn-primary w-full !py-4 text-lg shadow-blue-500/20"
           >
             {loading ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                Processing...
-              </>
+              <Loader2 className="w-6 h-6 animate-spin mx-auto" />
             ) : (
               isSignUp ? 'Create Account' : 'Sign In'
             )}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
-            {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-            <button
-              onClick={() => {
-                setIsSignUp(!isSignUp);
-                setError(null);
-              }}
-              className="ml-2 text-blue-600 hover:text-blue-700 font-medium"
-            >
-              {isSignUp ? 'Sign In' : 'Sign Up'}
-            </button>
-          </p>
+        <div className="mt-10 text-center">
+          <button
+            onClick={() => {
+              setIsSignUp(!isSignUp);
+              setError(null);
+            }}
+            className="text-slate-400 hover:text-white transition-colors text-sm font-bold"
+          >
+            {isSignUp ? 'Already a member? ' : 'New to ResumeTailor? '}
+            <span className="text-blue-500">
+              {isSignUp ? 'Sign In' : 'Create an Account'}
+            </span>
+          </button>
         </div>
       </div>
     </div>
   );
-};
+};

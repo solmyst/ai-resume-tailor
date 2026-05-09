@@ -9,3 +9,4 @@ sqlalchemy
 flask-sqlalchemy
 beautifulsoup4
 requests
+reportlab

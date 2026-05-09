@@ -1,182 +1,153 @@
 import React from 'react';
-import { Brain, Target, FileText, Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
+import { 
+  Sparkles, 
+  Zap, 
+  ArrowRight, 
+  Cpu,
+  ShieldCheck,
+  Layout
+} from 'lucide-react';
 
 interface LandingPageProps {
   onSignUp: () => void;
   onSignIn: () => void;
+  onQuickStart: () => void;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onSignUp, onSignIn }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({ onSignUp, onSignIn, onQuickStart }) => {
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="relative">
-                <Brain className="h-8 w-8 text-blue-600" />
-                <Target className="h-4 w-4 text-purple-600 absolute -top-1 -right-1" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-slate-900">AI Resume Tailor</h1>
-                <p className="text-sm text-slate-600">Smart Resume Optimization</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <button 
-                onClick={onSignIn}
-                className="px-4 py-2 text-slate-600 hover:text-slate-800 transition-colors"
-              >
-                Sign In
-              </button>
-              <button 
-                onClick={onSignUp}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Get Started
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="relative min-h-screen overflow-hidden bg-[#020617] text-white selection:bg-blue-500/30">
+      {/* Background Decor — lightweight */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full" style={{filter: 'blur(80px)'}} />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-600/5 rounded-full" style={{filter: 'blur(80px)'}} />
+      </div>
 
-      {/* Hero Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="mb-8">
-            <Sparkles className="w-16 h-16 text-blue-600 mx-auto mb-6" />
-            <h1 className="text-5xl font-bold text-gray-900 mb-6">
-              AI-Powered Resume Tailoring
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Stop sending the same resume to every job. Our AI analyzes job descriptions and 
-              automatically optimizes your resume for each application.
-            </p>
-            <button 
-              onClick={onSignUp}
-              className="inline-flex items-center px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-xl hover:bg-blue-700 transition-colors"
-            >
-              Start Tailoring Now
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </button>
+      {/* Navigation */}
+      <nav className="relative z-50 flex items-center justify-between px-8 py-6 max-w-7xl mx-auto bg-[#020617]/90 mt-4 rounded-2xl border border-white/5 mx-4">
+        <div className="flex items-center space-x-3 group cursor-pointer">
+          <div className="bg-gradient-to-tr from-blue-600 to-indigo-600 p-2 rounded-xl shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
+            <Sparkles className="w-6 h-6 text-white" />
           </div>
+          <span className="text-2xl font-black font-['Outfit'] tracking-tighter">
+            Resume<span className="text-blue-500">Tailor</span>AI
+          </span>
         </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            Why Choose AI Resume Tailor?
-          </h2>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <Brain className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-3">Smart NLP Analysis</h3>
-              <p className="text-gray-600">
-                Advanced spaCy and BERT models extract key skills and requirements from job descriptions
-              </p>
-            </div>
-            
-            <div className="text-center p-6">
-              <Target className="w-12 h-12 text-green-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-3">ATS Optimization</h3>
-              <p className="text-gray-600">
-                Ensures your resume passes Applicant Tracking Systems with proper keyword placement
-              </p>
-            </div>
-            
-            <div className="text-center p-6">
-              <FileText className="w-12 h-12 text-purple-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-3">Portfolio Suggestions</h3>
-              <p className="text-gray-600">
-                Get personalized project recommendations to showcase relevant skills
-              </p>
-            </div>
-          </div>
+        
+        <div className="hidden lg:flex items-center space-x-10 text-sm font-semibold text-slate-400">
+          <a href="#features" className="hover:text-blue-400 transition-colors">Features</a>
+          <a href="#workflow" className="hover:text-blue-400 transition-colors">Workflow</a>
         </div>
-      </section>
 
-      {/* How It Works */}
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            How It Works
-          </h2>
-          
-          <div className="space-y-8">
-            <div className="flex items-start space-x-4">
-              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">
-                1
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2">Upload Your Resume</h3>
-                <p className="text-gray-600">
-                  Upload your current resume in PDF, DOC, or TXT format. Our AI extracts and analyzes your content.
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-4">
-              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">
-                2
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2">Paste Job Description</h3>
-                <p className="text-gray-600">
-                  Copy and paste the job description. Our NLP models identify key requirements and skills.
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-4">
-              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">
-                3
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2">AI Optimization</h3>
-                <p className="text-gray-600">
-                  Our AI rewrites your resume to match the job requirements while maintaining truthfulness.
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-4">
-              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">
-                4
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2">Download & Apply</h3>
-                <p className="text-gray-600">
-                  Get your tailored resume with match scores, keyword analysis, and portfolio suggestions.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-16 px-4 bg-blue-600 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">
-            Ready to Land Your Dream Job?
-          </h2>
-          <p className="text-xl mb-8 text-blue-100">
-            Join thousands of professionals who've improved their job application success rate
-          </p>
+        <div className="flex items-center space-x-4">
+          <button onClick={onSignIn} className="hidden sm:block text-sm font-bold hover:text-blue-400 transition-colors">Sign In</button>
           <button 
-            onClick={onSignUp}
-            className="inline-flex items-center px-8 py-4 bg-white text-blue-600 text-lg font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+            onClick={onSignUp} 
+            className="btn-primary flex items-center group !py-2.5"
           >
-            Get Started Free
-            <ArrowRight className="w-5 h-5 ml-2" />
+            Get Started
+            <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative z-10 pt-24 pb-32 px-4">
+        <div className="max-w-6xl mx-auto text-center">
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-500/5 border border-blue-500/20 text-blue-400 text-xs font-bold mb-8">
+            <Zap className="w-3 h-3 mr-2 text-yellow-400" />
+            LOCAL AI · RUNS ON YOUR MACHINE · 100% PRIVATE
+          </div>
+          
+          <h1 className="text-6xl md:text-8xl lg:text-9xl font-black mb-10 leading-[0.9] tracking-tighter">
+            TAILOR YOUR <br />
+            <span className="premium-gradient-text">RESUME</span>
+          </h1>
+          
+          <p className="text-lg md:text-2xl text-slate-400 mb-14 max-w-3xl mx-auto leading-relaxed font-medium">
+            Upload your resume, paste a job description, and let local AI optimize it for <span className="text-white">maximum ATS compatibility</span>. Everything runs on your machine.
+          </p>
+
+          <div className="flex flex-col sm:row items-center justify-center gap-6 mb-24">
+            <button 
+              onClick={onQuickStart}
+              className="group relative px-10 py-5 bg-blue-600 rounded-2xl text-xl font-black flex items-center justify-center transition-all hover:bg-blue-500 hover:scale-105 active:scale-95 shadow-[0_20px_50px_rgba(37,99,235,0.3)]"
+            >
+              Start Tailoring
+              <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform" />
+            </button>
+            <p className="text-sm text-slate-500 font-medium">No account required · Works offline with Ollama</p>
+          </div>
+
+          {/* Feature Grid */}
+          <div id="features" className="grid md:grid-cols-3 gap-8 text-left">
+            {[
+              {
+                icon: <Cpu className="w-8 h-8 text-blue-400" />,
+                title: "Ollama Integration",
+                desc: "Run 100% locally with Ollama support. Your data stays on your machine, zero cloud dependency."
+              },
+              {
+                icon: <Layout className="w-8 h-8 text-purple-400" />,
+                title: "ATS-Optimized Output",
+                desc: "Generates clean Markdown and PDF files structured for Applicant Tracking Systems."
+              },
+              {
+                icon: <ShieldCheck className="w-8 h-8 text-emerald-400" />,
+                title: "Complete Privacy",
+                desc: "No data leaves your machine. No tracking, no uploads, no external API calls required."
+              }
+            ].map((f, i) => (
+              <div key={i} className="glass-card p-10 group hover:border-blue-500/50 transition-all">
+                <div className="mb-6 bg-slate-950/50 w-16 h-16 rounded-2xl flex items-center justify-center ring-1 ring-white/10 group-hover:bg-blue-600/10 group-hover:ring-blue-500/50 transition-all">
+                  {f.icon}
+                </div>
+                <h3 className="text-2xl font-bold mb-4 font-['Outfit']">{f.title}</h3>
+                <p className="text-slate-400 leading-relaxed font-medium">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
+
+      {/* Workflow */}
+      <section id="workflow" className="py-32 px-4 relative">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl md:text-6xl font-black text-center mb-20 tracking-tighter">
+            HOW IT <span className="premium-gradient-text">WORKS</span>
+          </h2>
+          
+          <div className="space-y-16">
+            {[
+              { t: "Upload Your Resume", d: "Upload your existing resume as PDF, DOCX, or plain text. The backend extracts and parses it instantly.", s: "01" },
+              { t: "Paste the Job Description", d: "Paste the full job description or import it from a URL. The AI identifies the key requirements and keywords.", s: "02" },
+              { t: "Get Your Tailored Resume", d: "Review the AI-tailored version with match score, added keywords, and export it as a professionally formatted PDF.", s: "03" }
+            ].map((step, i) => (
+              <div key={i} className="flex flex-col md:flex-row gap-8 items-center group">
+                <div className="text-8xl font-black text-slate-900 group-hover:text-blue-900/30 transition-colors select-none">
+                  {step.s}
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                  <h3 className="text-3xl font-bold mb-4 font-['Outfit']">{step.t}</h3>
+                  <p className="text-xl text-slate-400 font-medium leading-relaxed">{step.d}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 pt-32 pb-12 px-8">
+        <div className="max-w-7xl mx-auto flex flex-col items-center">
+          <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-16" />
+          <div className="flex items-center space-x-3 mb-8 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-pointer">
+            <Sparkles className="w-6 h-6 text-blue-500" />
+            <span className="text-xl font-black tracking-tighter">ResumeTailor AI</span>
+          </div>
+          <p className="text-slate-500 text-sm font-medium mb-10">Open source · Local-first · Built with Ollama + React</p>
+        </div>
+      </footer>
     </div>
   );
 };

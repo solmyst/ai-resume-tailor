@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { LandingPage } from './components/LandingPage';
 import { Dashboard } from './components/Dashboard';
 import { ResumeTailor } from './components/ResumeTailor';
@@ -20,6 +20,18 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [showAuth, setShowAuth] = useState(false);
 
+  // Auto-login for local dev or Quick Start
+  const handleQuickStart = () => {
+    const mockUser: User = {
+      id: 'local-user',
+      name: 'User',
+      email: '',
+      subscription: 'professional'
+    };
+    setUser(mockUser);
+    setCurrentPage('resume'); // Go straight to the tailor
+  };
+
   const handleAuth = (userData: User) => {
     setUser(userData);
     setCurrentPage('dashboard');
@@ -33,28 +45,40 @@ function App() {
 
   const renderPage = () => {
     if (!user && currentPage !== 'landing') {
-      return <LandingPage onSignUp={() => setShowAuth(true)} onSignIn={() => setShowAuth(true)} />;
+      return (
+        <LandingPage 
+          onSignUp={() => setShowAuth(true)} 
+          onSignIn={() => setShowAuth(true)} 
+          onQuickStart={handleQuickStart}
+        />
+      );
     }
 
     switch (currentPage) {
       case 'landing':
-        return <LandingPage onSignUp={() => setShowAuth(true)} onSignIn={() => setShowAuth(true)} />;
+        return (
+          <LandingPage 
+            onSignUp={() => setShowAuth(true)} 
+            onSignIn={() => setShowAuth(true)} 
+            onQuickStart={handleQuickStart}
+          />
+        );
       case 'dashboard':
-        return <Dashboard user={user!} onNavigate={setCurrentPage} />;
+        return <Dashboard user={user!} onNavigate={(page) => setCurrentPage(page as Page)} />;
       case 'resume':
         return <ResumeTailor user={user!} onBack={() => setCurrentPage('dashboard')} />;
       default:
-        return <Dashboard user={user!} onNavigate={setCurrentPage} />;
+        return <Dashboard user={user!} onNavigate={(page) => setCurrentPage(page as Page)} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-[#020617]">
       {user && (
         <Navigation 
           user={user} 
           currentPage={currentPage}
-          onNavigate={setCurrentPage}
+          onNavigate={(page) => setCurrentPage(page as Page)}
           onLogout={handleLogout}
         />
       )}
@@ -72,5 +96,6 @@ function App() {
     </div>
   );
 }
+
 
 export default App;

@@ -1,3 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-primary: 220 100% 50%;
+    --brand-secondary: 260 100% 60%;
+    --bg-dark: 230 40% 6%;
+    --bg-card: 230 40% 10%;
+    --text-main: 210 20% 98%;
+    --text-dim: 215 15% 70%;
+  }
+
+  body {
+    @apply antialiased bg-[#020617] text-slate-50 font-['Plus_Jakarta_Sans'];
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-['Outfit'] tracking-tight;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-[#0a1128] border border-white/5 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] transition-all duration-300;
+  }
+  
+  .glass-card-hover {
+    @apply hover:border-blue-500/30 hover:bg-[#0d1635] hover:shadow-[0_12px_48px_0_rgba(37,99,235,0.15)] hover:-translate-y-1;
+  }
+  
+  .glass-input {
+    @apply bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white/[0.08] transition-all placeholder:text-slate-500 font-bold;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-500 text-white font-black px-8 py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-blue-500/25 flex items-center justify-center relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-secondary {
+    @apply bg-white/5 hover:bg-white/10 text-white font-black px-8 py-4 rounded-2xl transition-all border border-white/10 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .premium-gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 font-black;
+  }
+
+  .section-header {
+    @apply text-sm font-black text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-3;
+  }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+
+.entry-animation {
+  animation: entry 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes entry {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-[#020617];
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+}

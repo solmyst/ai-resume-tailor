@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import os
 from typing import Dict, List
@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 from database import db, init_db
 from models import User, Resume, JobAnalysis, TailoredResume, ActivityLog
 from ai_service import AIService
+from resume_generator import generate_resume_pdf
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
 from datetime import datetime
@@ -138,6 +139,47 @@ def login():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/upload-resume', methods=['POST'])
+def upload_resume():
+    """Handle resume file upload and text extraction"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+
+        user_id = request.form.get('userId', 'guest')
+        
+        try:
+            content = file.read()
+            resume_text = extract_text_from_file(content, file.filename)
+        except Exception as e:
+            print(f"Extraction error: {e}")
+            return jsonify({'error': f'Failed to read file: {str(e)}'}), 400
+        
+        if not resume_text or len(resume_text.strip()) < 10:
+            return jsonify({'error': 'Resume appears to be empty or unreadable'}), 400
+
+        # Simple extraction for technical skills (fallback)
+        skills_keywords = ['Python', 'Java', 'React', 'Node', 'SQL', 'AWS', 'Docker', 'Kubernetes', 'JavaScript', 'TypeScript', 'HTML', 'CSS']
+        extracted_skills = [s for s in skills_keywords if s.lower() in resume_text.lower()]
+
+        return jsonify({
+            'success': True,
+            'resume_text': resume_text,
+            'filename': file.filename,
+            'extracted_data': {
+                'technical_skills': extracted_skills,
+                'general_skills': [],
+                'entities': []
+            }
+        })
+    except Exception as e:
+        print(f"CRITICAL: Upload error: {e}")
+        return jsonify({'error': f'Upload failed: {str(e)}'}), 500
+
+@app.route('/api/analyze-job', methods=['POST'])
 def analyze_job():
     """Analyze job description from text or URL"""
     try:
@@ -153,29 +195,18 @@ def analyze_job():
         if not job_text:
             return jsonify({'error': 'Job description or URL is required'}), 400
         
-        # Analyze with AI
+        # Analyze with AI (or Mock)
         job_analysis = ai_service.analyze_job(job_text)
-        
-        # Save to DB
-        new_job = JobAnalysis(
-            job_text=job_text,
-            job_url=job_url,
-            role=job_analysis.get('role'),
-            company=job_analysis.get('company'),
-            required_skills=job_analysis.get('required_skills')
-        )
-        db.session.add(new_job)
-        db.session.commit()
         
         return jsonify({
             'success': True,
             'job_analysis': job_analysis,
-            'job_id': new_job.id,
             'scraped_text': job_text if job_url else None
         })
     
     except Exception as e:
         return jsonify({'error': f'Analysis error: {str(e)}'}), 500
+
 
 @app.route('/api/tailor-resume', methods=['POST'])
 def tailor_resume():
@@ -223,7 +254,16 @@ def get_user_stats(user_id):
     try:
         user = User.query.get(user_id)
         if not user:
-            return jsonify({'error': 'User not found'}), 404
+            # Return empty stats for guest/quick-start users instead of 404
+            return jsonify({
+                'success': True,
+                'stats': {
+                    'resumes_tailored': 0,
+                    'average_match_score': 0,
+                    'applications_sent': 0,
+                    'recent_activity': []
+                }
+            })
 
         # Calculate stats
         resumes_tailored = TailoredResume.query.join(Resume).filter(Resume.user_id == user_id).count()
@@ -275,6 +315,28 @@ def add_user_activity(user_id):
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/generate-pdf', methods=['POST'])
+def generate_pdf():
+    """Generate a professional PDF resume from tailored text"""
+    try:
+        data = request.get_json()
+        tailored_text = data.get('tailored_text', '')
+        
+        if not tailored_text:
+            return jsonify({'error': 'No tailored text provided'}), 400
+        
+        pdf_bytes = generate_resume_pdf(tailored_text)
+        
+        return send_file(
+            BytesIO(pdf_bytes),
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=f'tailored-resume.pdf'
+        )
+    except Exception as e:
+        print(f"PDF generation error: {e}")
+        return jsonify({'error': f'PDF generation failed: {str(e)}'}), 500
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
