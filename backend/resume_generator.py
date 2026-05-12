@@ -1,11 +1,17 @@
 import re
 from io import BytesIO
+from xml.sax.saxutils import escape as xml_escape
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.lib.colors import HexColor
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
+
+
+def safe_para(text: str, style) -> Paragraph:
+    """Create a Paragraph with XML-escaped text to prevent ReportLab crashes."""
+    return Paragraph(xml_escape(str(text)), style)
 
 
 def parse_tailored_text(tailored_text: str) -> dict:
@@ -167,9 +173,9 @@ def generate_resume_pdf(tailored_text: str) -> bytes:
 
     # Header
     if data['name']:
-        elements.append(Paragraph(data['name'], name_style))
+        elements.append(safe_para(data['name'], name_style))
     if data['contact']:
-        elements.append(Paragraph(data['contact'], contact_style))
+        elements.append(safe_para(data['contact'], contact_style))
     
     elements.append(HRFlowable(width="100%", thickness=1, color=primary, spaceBefore=0, spaceAfter=8))
 
@@ -180,17 +186,17 @@ def generate_resume_pdf(tailored_text: str) -> bytes:
         elements.append(HRFlowable(width="100%", thickness=0.2, color=gray, spaceAfter=4))
         if is_bulleted:
             for item in content_list:
-                elements.append(Paragraph(f"• {item}", bullet_style))
+                elements.append(safe_para(f"\u2022 {item}", bullet_style))
         else:
             for item in content_list:
-                elements.append(Paragraph(item, body_style))
+                elements.append(safe_para(item, body_style))
         elements.append(Spacer(1, 4))
 
     # Render Summary
     if data['summary']:
         elements.append(Paragraph('PROFESSIONAL SUMMARY', header_style))
         elements.append(HRFlowable(width="100%", thickness=0.2, color=gray, spaceAfter=4))
-        elements.append(Paragraph(data['summary'], body_style))
+        elements.append(safe_para(data['summary'], body_style))
         elements.append(Spacer(1, 6))
 
     # Render Experience
@@ -198,19 +204,19 @@ def generate_resume_pdf(tailored_text: str) -> bytes:
         elements.append(Paragraph('EXPERIENCE', header_style))
         elements.append(HRFlowable(width="100%", thickness=0.2, color=gray, spaceAfter=4))
         for entry in data['experience']:
-            elements.append(Paragraph(entry['title'], title_style))
+            elements.append(safe_para(entry['title'], title_style))
             if entry['details']:
-                elements.append(Paragraph(entry['details'], detail_style))
+                elements.append(safe_para(entry['details'], detail_style))
             for b in entry['bullets']:
-                elements.append(Paragraph(f"• {b}", bullet_style))
+                elements.append(safe_para(f"\u2022 {b}", bullet_style))
             elements.append(Spacer(1, 4))
 
     # Render Skills
     if data['skills']:
         elements.append(Paragraph('SKILLS', header_style))
         elements.append(HRFlowable(width="100%", thickness=0.2, color=gray, spaceAfter=4))
-        skills_text = " • ".join(data['skills'])
-        elements.append(Paragraph(skills_text, body_style))
+        skills_text = " \u2022 ".join(data['skills'])
+        elements.append(safe_para(skills_text, body_style))
         elements.append(Spacer(1, 6))
 
     # Render Education/Projects/Certs
@@ -221,13 +227,13 @@ def generate_resume_pdf(tailored_text: str) -> bytes:
         elements.append(HRFlowable(width="100%", thickness=0.2, color=gray, spaceAfter=4))
         if isinstance(data[key][0], dict):
             for entry in data[key]:
-                elements.append(Paragraph(entry['title'], title_style))
-                if entry['details']: elements.append(Paragraph(entry['details'], detail_style))
-                for b in entry['bullets']: elements.append(Paragraph(f"• {b}", bullet_style))
+                elements.append(safe_para(entry['title'], title_style))
+                if entry['details']: elements.append(safe_para(entry['details'], detail_style))
+                for b in entry['bullets']: elements.append(safe_para(f"\u2022 {b}", bullet_style))
                 elements.append(Spacer(1, 4))
         else:
             for item in data[key]:
-                elements.append(Paragraph(f"• {item}", bullet_style))
+                elements.append(safe_para(f"\u2022 {item}", bullet_style))
             elements.append(Spacer(1, 4))
 
     # Fallback for anything missed
@@ -235,7 +241,7 @@ def generate_resume_pdf(tailored_text: str) -> bytes:
         elements.append(Paragraph('ADDITIONAL INFORMATION', header_style))
         elements.append(HRFlowable(width="100%", thickness=0.2, color=gray, spaceAfter=4))
         for line in data['raw_content']:
-            elements.append(Paragraph(line, body_style))
+            elements.append(safe_para(line, body_style))
 
     doc.build(elements)
     return buffer.getvalue()

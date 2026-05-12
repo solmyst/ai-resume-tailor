@@ -5,7 +5,8 @@ import {
   ArrowRight, 
   Cpu,
   ShieldCheck,
-  Layout
+  Layout,
+  Key
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -56,7 +57,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onSignUp, onSignIn, on
         <div className="max-w-6xl mx-auto text-center">
           <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-500/5 border border-blue-500/20 text-blue-400 text-xs font-bold mb-8">
             <Zap className="w-3 h-3 mr-2 text-yellow-400" />
-            LOCAL AI · RUNS ON YOUR MACHINE · 100% PRIVATE
+            OPENAI POWERED · TOKEN OPTIMIZED · ATS READY
           </div>
           
           <h1 className="text-6xl md:text-8xl lg:text-9xl font-black mb-10 leading-[0.9] tracking-tighter">
@@ -65,7 +66,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onSignUp, onSignIn, on
           </h1>
           
           <p className="text-lg md:text-2xl text-slate-400 mb-14 max-w-3xl mx-auto leading-relaxed font-medium">
-            Upload your resume, paste a job description, and let local AI optimize it for <span className="text-white">maximum ATS compatibility</span>. Everything runs on your machine.
+            Upload your resume, paste a job description, and let AI optimize it for <span className="text-white">maximum ATS compatibility</span>. Powered by GPT-4o-mini with minimal token usage.
           </p>
 
           <div className="flex flex-col sm:row items-center justify-center gap-6 mb-24">
@@ -76,16 +77,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onSignUp, onSignIn, on
               Start Tailoring
               <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform" />
             </button>
-            <p className="text-sm text-slate-500 font-medium">No account required · Works offline with Ollama</p>
+            <p className="text-sm text-slate-500 font-medium">No account required · Add your OpenAI key in ⚙ Settings</p>
           </div>
 
           {/* Feature Grid */}
           <div id="features" className="grid md:grid-cols-3 gap-8 text-left">
             {[
               {
-                icon: <Cpu className="w-8 h-8 text-blue-400" />,
-                title: "Ollama Integration",
-                desc: "Run 100% locally with Ollama support. Your data stays on your machine, zero cloud dependency."
+                icon: <Key className="w-8 h-8 text-blue-400" />,
+                title: "OpenAI Powered",
+                desc: "Uses GPT-4o-mini for cost-efficient, high-quality tailoring. Aggressive token optimization keeps costs near zero."
               },
               {
                 icon: <Layout className="w-8 h-8 text-purple-400" />,
@@ -93,9 +94,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onSignUp, onSignIn, on
                 desc: "Generates clean Markdown and PDF files structured for Applicant Tracking Systems."
               },
               {
-                icon: <ShieldCheck className="w-8 h-8 text-emerald-400" />,
-                title: "Complete Privacy",
-                desc: "No data leaves your machine. No tracking, no uploads, no external API calls required."
+                icon: <Cpu className="w-8 h-8 text-emerald-400" />,
+                title: "Flexible AI Backend",
+                desc: "Supports OpenAI, Gemini, and local Ollama. Falls back gracefully with an offline keyword engine."
               }
             ].map((f, i) => (
               <div key={i} className="glass-card p-10 group hover:border-blue-500/50 transition-all">
@@ -145,7 +146,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onSignUp, onSignIn, on
             <Sparkles className="w-6 h-6 text-blue-500" />
             <span className="text-xl font-black tracking-tighter">ResumeTailor AI</span>
           </div>
-          <p className="text-slate-500 text-sm font-medium mb-10">Open source · Local-first · Built with Ollama + React</p>
+          <p className="text-slate-500 text-sm font-medium mb-10">Open source · Token-optimized · Built with OpenAI + React</p>
         </div>
       </footer>
     </div>

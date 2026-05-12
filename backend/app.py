@@ -338,11 +338,45 @@ def generate_pdf():
         print(f"PDF generation error: {e}")
         return jsonify({'error': f'PDF generation failed: {str(e)}'}), 500
 
+@app.route('/api/settings/api-key', methods=['POST'])
+def set_api_key():
+    """Set OpenAI API key at runtime from the frontend settings panel"""
+    try:
+        data = request.get_json()
+        key = data.get('api_key', '').strip()
+        
+        if not key:
+            return jsonify({'error': 'API key is required'}), 400
+        
+        if not key.startswith('sk-'):
+            return jsonify({'error': 'Invalid key format — must start with sk-'}), 400
+        
+        success = ai_service.set_openai_key(key)
+        if success:
+            return jsonify({
+                'success': True,
+                'provider': ai_service.provider,
+                'message': 'OpenAI API key validated and activated'
+            })
+        else:
+            return jsonify({'error': 'Key validation failed — check your key on platform.openai.com'}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/settings/api-key', methods=['DELETE'])
+def clear_api_key():
+    """Clear the API key and fall back to next available provider"""
+    ai_service.openai_key = ''
+    ai_service.openai_client = None
+    ai_service._init_providers()
+    return jsonify({'success': True, 'provider': ai_service.provider})
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     return jsonify({
         'status': 'healthy',
         'ai_provider': ai_service.provider,
+        'has_openai_key': bool(ai_service.openai_key and ai_service.openai_key != 'your_openai_api_key_here'),
         'database': 'connected'
     })
 
