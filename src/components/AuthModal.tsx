@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Mail, Lock, User, Loader2, Sparkles } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 interface AuthModalProps {
   onClose: () => void;
@@ -23,7 +24,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuth }) => {
 
     try {
       const endpoint = isSignUp ? '/api/auth/register' : '/api/auth/login';
-      const response = await fetch(`http://localhost:5000${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

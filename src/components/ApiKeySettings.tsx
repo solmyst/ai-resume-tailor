@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Key, CheckCircle, AlertCircle, Loader2, X, Zap, Shield, Trash2 } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 interface ApiKeySettingsProps {
   isOpen: boolean;
@@ -21,7 +22,7 @@ export const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ isOpen, onClose 
 
   const fetchHealth = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/health');
+      const res = await fetch(`${API_BASE_URL}/api/health`);
       const data = await res.json();
       setCurrentProvider(data.ai_provider || 'unknown');
       setHasKey(data.has_openai_key || false);
@@ -37,7 +38,7 @@ export const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ isOpen, onClose 
     setMessage('');
 
     try {
-      const res = await fetch('http://localhost:5000/api/settings/api-key', {
+      const res = await fetch(`${API_BASE_URL}/api/settings/api-key`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ api_key: apiKey.trim() })
@@ -63,7 +64,7 @@ export const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ isOpen, onClose 
 
   const handleClear = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/settings/api-key', {
+      const res = await fetch(`${API_BASE_URL}/api/settings/api-key`, {
         method: 'DELETE'
       });
       const data = await res.json();

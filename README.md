@@ -1,241 +1,108 @@
-# AI-Driven Resume & Portfolio Tailor
+# 🚀 AI Resume Tailor
 
-An intelligent application that automatically rewrites resumes and suggests portfolio projects based on job descriptions using advanced NLP and machine learning techniques.
+> **Stop applying. Start landing.**  
+> A premium, AI-powered platform designed to optimize your resume for specific job descriptions in seconds.
 
-## 🚀 Quick Start (Windows)
-
-**Easiest way to get started:**
-
-1. **Clone and setup:**
-   ```bash
-   git clone <your-repo>
-   cd ai-resume-tailor
-   ```
-
-2. **Run the setup script:**
-   
-   **For Command Prompt:**
-   ```bash
-   .\start-simple.bat
-   ```
-   
-   **For PowerShell:**
-   ```bash
-   .\start-simple.ps1
-   ```
-   
-   This will automatically:
-   - Install all dependencies
-   - Set up the Python backend (simplified version)
-   - Start both servers
-
-3. **Access the application:**
-   - Frontend: http://localhost:5173 (or 5174)
-   - Backend API: http://localhost:5000
-
-## ✨ Features
-
-- **Complete User Interface**: Landing page, dashboard, authentication
-- **Smart Resume Upload**: Supports PDF, DOC, DOCX, and TXT files
-- **AI-Powered Analysis**: Uses spaCy and Sentence Transformers for keyword extraction
-- **Job Description Processing**: Automatically extracts requirements and key skills
-- **ATS Optimization**: Ensures resumes pass Applicant Tracking Systems
-- **Portfolio Suggestions**: Recommends relevant projects based on job requirements
-- **Interview Practice**: AI-generated interview questions
-- **Real-time Analytics**: Match scores and optimization insights
-
-## 🛠 Technology Stack
-
-### Frontend
-- **React 18** with TypeScript
-- **Tailwind CSS** for styling
-- **Lucide React** for icons
-- **Vite** for build tooling
-
-### Backend
-- **Python Flask** API
-- **Rule-based NLP** for keyword extraction
-- **Pattern matching** for skill identification
-- **OpenAI GPT** integration (optional)
-- **PyPDF2 & python-docx** for file processing
-
-### AI Components
-- **Keyword Extraction**: Pattern-based skill and technology identification
-- **Smart Matching**: Rule-based similarity scoring with skill weighting
-- **AI Rewriting**: OpenAI GPT integration with intelligent fallbacks
-- **ATS Optimization**: Custom keyword placement and formatting rules
-
-## 📋 Manual Setup
-
-### Prerequisites
-- Node.js 18+ and npm
-- Python 3.8+
-- pip package manager
-
-### Frontend Setup
-```bash
-npm install
-npm run dev
-```
-
-### Backend Setup
-```bash
-cd backend
-python setup.py
-python app.py
-```
-
-### Test Connection
-```bash
-node test-connection.js
-```
-
-## 🔧 Configuration
-
-### Environment Variables
-Create `backend/.env`:
-```bash
-# OpenAI API Key (optional - for enhanced AI features)
-OPENAI_API_KEY=your_openai_api_key_here
-
-# Flask Configuration
-FLASK_ENV=development
-FLASK_DEBUG=True
-```
-
-## 📱 How to Use
-
-1. **Sign Up/Sign In**: Create an account or use demo mode
-2. **Upload Resume**: Drag & drop your resume (PDF, DOC, DOCX, TXT)
-3. **Add Job Description**: Paste the job posting you're applying for
-4. **AI Processing**: Watch as AI analyzes and optimizes your resume
-5. **Review Results**: See match scores, added keywords, and suggestions
-6. **Download**: Get your tailored, ATS-optimized resume
-
-## 🧠 AI Features
-
-### What Makes It Unique
-This isn't just ChatGPT + prompts. It includes:
-
-- **Custom NLP Pipeline**: spaCy for skill extraction and entity recognition
-- **Semantic Similarity**: BERT embeddings for intelligent matching
-- **ATS Optimization**: Keyword placement and formatting algorithms
-- **Smart Fallbacks**: Works without OpenAI using built-in models
-- **Real-time Processing**: Live feedback and progress indicators
-
-### ML Pipeline
-1. **Text Extraction**: Parse resumes from various file formats
-2. **NLP Analysis**: Extract skills, experience, and entities using spaCy
-3. **Job Parsing**: Identify requirements and key skills from job descriptions
-4. **Semantic Matching**: Calculate similarity scores using BERT embeddings
-5. **AI Rewriting**: Generate optimized content while maintaining truthfulness
-6. **ATS Compliance**: Ensure proper formatting and keyword density
-
-## 🔍 API Endpoints
-
-- `POST /api/upload-resume` - Upload and process resume file
-- `POST /api/analyze-job` - Analyze job description
-- `POST /api/tailor-resume` - Generate tailored resume
-- `GET /api/health` - Health check and model status
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-**Backend not starting:**
-```bash
-cd backend
-pip install flask flask-cors openai PyPDF2 python-docx python-dotenv requests
-python app.py
-```
-
-**Frontend errors:**
-```bash
-npm install
-npm run dev
-```
-
-**CORS issues:**
-- Ensure backend is running on port 5000
-- Check Flask-CORS is installed
-
-**File upload problems:**
-- Verify file format (PDF, DOC, DOCX, TXT)
-- Check file size (max 10MB)
-
-### Test Backend Health
-```bash
-node test-connection.js
-```
-
-## 📊 Development Scripts
-
-```bash
-# Frontend
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run preview      # Preview production build
-
-# Backend
-npm run backend      # Start backend server
-npm run setup-backend # Setup backend dependencies
-
-# Combined
-npm run start        # Start both frontend and backend
-```
-
-## 🎯 Project Structure
-
-```
-ai-resume-tailor/
-├── src/                    # Frontend React app
-│   ├── components/         # React components
-│   ├── App.tsx            # Main app component
-│   └── main.tsx           # Entry point
-├── backend/               # Python Flask API
-│   ├── app.py            # Main Flask application
-│   ├── requirements.txt   # Python dependencies
-│   └── setup.py          # Setup script
-├── start-dev.bat         # Windows startup script
-├── test-connection.js    # Connection test
-└── README.md            # This file
-```
-
-## 🚀 Deployment
-
-### Frontend (Vercel/Netlify)
-```bash
-npm run build
-# Deploy the 'dist' folder
-```
-
-### Backend (Heroku/Railway)
-1. Add `Procfile`: `web: python app.py`
-2. Set environment variables
-3. Deploy backend folder
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 📄 License
-
-MIT License - see LICENSE file for details
-
-## 🗺 Roadmap
-
-- [ ] LinkedIn profile integration
-- [ ] Multiple resume templates
-- [ ] Batch processing for multiple jobs
-- [ ] Chrome extension for job sites
-- [ ] Advanced analytics dashboard
-- [ ] Team collaboration features
-- [ ] Mobile app version
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 
 ---
 
-**Ready to land your dream job? Start tailoring your resume with AI! 🎯**
+## ✨ Features
+
+- **🎯 ATS Optimization**: Sophisticated AI analysis to align your resume with job requirements and pass Applicant Tracking Systems.
+- **📄 Smart PDF Generation**: Beautiful, professional typography and layout constraints applied automatically.
+- **🔗 URL Scraping**: Import job descriptions directly from LinkedIn, Indeed, and other major platforms.
+- **🛡️ Privacy First**: Local-first processing architecture ensuring your professional data stays secure.
+- **📊 Interactive Dashboard**: Track your tailoring history, match scores, and application progress.
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **Framework**: React 18 with TypeScript
+- **Styling**: Tailwind CSS (Premium Glassmorphism Design)
+- **Icons**: Lucide React
+- **Build Tool**: Vite
+
+### Backend
+- **Core**: Flask (Python)
+- **Database**: SQLite with SQLAlchemy
+- **AI Engine**: Google Gemini / OpenAI / Ollama (Local)
+- **PDF Engine**: PyPDF2 / Custom Generators
+
+---
+
+## 🚀 Quick Start
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/solmyst/ai-resume-tailor.git
+cd ai-resume-tailor
+```
+
+### 2. Setup Backend
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python app.py
+```
+
+### 3. Setup Frontend
+```bash
+# In the root directory
+npm install
+npm run dev
+```
+
+---
+
+## 🌐 Going Live (GitHub Pages)
+
+### 1. Configure the API URL
+Create a `.env.production` file in the root directory:
+```env
+VITE_API_URL=https://your-backend-url.onrender.com
+```
+
+### 2. Deploy to GitHub Pages
+```bash
+npm run deploy
+```
+*Your site will be live at: `https://<username>.github.io/ai-resume-tailor/`*
+
+### 3. Host the Backend
+Since GitHub Pages only hosts static files, you must host the Python backend separately. We recommend:
+- [Render](https://render.com/) (Free Tier available)
+- [Railway](https://railway.app/)
+- [Heroku](https://www.heroku.com/)
+
+---
+
+## 🤝 Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+<p align="center">
+  Built with ❤️ by <a href="https://github.com/solmyst">Solmyst</a>
+</p>

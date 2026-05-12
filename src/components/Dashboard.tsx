@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Clock, CheckCircle, Loader2, ArrowRight, Sparkles, AlertCircle, Wifi, WifiOff } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 interface DashboardProps {
   user: {
@@ -42,7 +43,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
 
   const fetchUserStats = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/user/${user.id}/stats`);
+      const response = await fetch(`${API_BASE_URL}/api/user/${user.id}/stats`);
       
       if (!response.ok) {
         setStats({
@@ -78,7 +79,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
   const fetchHealthStatus = async () => {
     setHealthLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/health');
+      const response = await fetch(`${API_BASE_URL}/api/health`);
       if (response.ok) {
         const data = await response.json();
         setHealth(data);

@@ -17,6 +17,7 @@ import {
   ChevronRight,
   RotateCcw
 } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 interface ResumeTailorProps {
   user: {
@@ -63,7 +64,7 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
     try {
       let response;
       try {
-        response = await fetch('http://localhost:5000/api/analyze-job', {
+        response = await fetch(`${API_BASE_URL}/api/analyze-job`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ job_url: jobUrl })
@@ -98,7 +99,7 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
 
       let response;
       try {
-        response = await fetch('http://localhost:5000/api/upload-resume', {
+        response = await fetch(`${API_BASE_URL}/api/upload-resume`, {
           method: 'POST',
           body: formData,
         });
@@ -142,7 +143,7 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
     try {
       let response;
       try {
-        response = await fetch('http://localhost:5000/api/tailor-resume', {
+        response = await fetch(`${API_BASE_URL}/api/tailor-resume`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -192,7 +193,7 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
     try {
       let response;
       try {
-        response = await fetch('http://localhost:5000/api/generate-pdf', {
+        response = await fetch(`${API_BASE_URL}/api/generate-pdf`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ tailored_text: analysis.tailoredText }),
