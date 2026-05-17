@@ -84,6 +84,7 @@ export const Navigation: React.FC<NavigationProps> = ({ user, currentPage, onNav
                 </div>
               </div>
               
+              {/* 
               <button
                 onClick={onLogout}
                 className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/5 rounded-xl transition-all active:scale-90"
@@ -91,6 +92,7 @@ export const Navigation: React.FC<NavigationProps> = ({ user, currentPage, onNav
               >
                 <LogOut className="w-5 h-5" />
               </button>
+              */}
             </div>
           </div>
         </div>

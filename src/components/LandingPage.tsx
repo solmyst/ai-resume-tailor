@@ -41,9 +41,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onSignUp, onSignIn, on
         </div>
 
         <div className="flex items-center space-x-4">
-          <button onClick={onSignIn} className="hidden sm:block text-sm font-bold hover:text-blue-400 transition-colors">Sign In</button>
+          {/* <button onClick={onSignIn} className="hidden sm:block text-sm font-bold hover:text-blue-400 transition-colors">Sign In</button> */}
           <button 
-            onClick={onSignUp} 
+            onClick={onQuickStart} 
             className="btn-primary flex items-center group !py-2.5"
           >
             Get Started
