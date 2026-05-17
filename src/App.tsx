@@ -73,7 +73,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020617]">
+    <div className="min-h-screen bg-fog text-ink">
       {user && (
         <Navigation 
           user={user} 
@@ -83,7 +83,7 @@ function App() {
         />
       )}
       
-      <main className={user ? 'pt-16' : ''}>
+      <main className={user ? 'pt-24 pb-8' : ''}>
         {renderPage()}
       </main>
 

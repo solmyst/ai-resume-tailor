@@ -53,7 +53,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuth }) => {
         
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors"
+          className="absolute top-6 right-6 text-slate-500 hover:text-slate-900 transition-colors"
         >
           <X className="w-6 h-6" />
         </button>
@@ -65,7 +65,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuth }) => {
           <h2 className="text-3xl font-black mb-2 tracking-tight">
             {isSignUp ? 'Join the Elite' : 'Welcome Back'}
           </h2>
-          <p className="text-slate-400 font-medium">
+          <p className="text-slate-600 font-medium">
             {isSignUp ? 'Start optimizing your career today.' : 'Sign in to access your dashboard.'}
           </p>
         </div>
@@ -147,7 +147,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuth }) => {
               setIsSignUp(!isSignUp);
               setError(null);
             }}
-            className="text-slate-400 hover:text-white transition-colors text-sm font-bold"
+            className="text-slate-600 hover:text-slate-900 transition-colors text-sm font-bold"
           >
             {isSignUp ? 'Already a member? ' : 'New to ResumeTailor? '}
             <span className="text-blue-500">
@@ -158,4 +158,4 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuth }) => {
       </div>
     </div>
   );
-};
+};

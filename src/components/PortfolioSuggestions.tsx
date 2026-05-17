@@ -64,7 +64,7 @@ export function PortfolioSuggestions({ projects, jobDescription, onNext }: Portf
                     : 'border-slate-300'
                 }`}>
                   {selectedProjects.includes(project.name) && (
-                    <Plus className="h-4 w-4 text-white transform rotate-45" />
+                    <Plus className="h-4 w-4 text-slate-900 transform rotate-45" />
                   )}
                 </div>
               </div>
@@ -85,7 +85,7 @@ export function PortfolioSuggestions({ projects, jobDescription, onNext }: Portf
                   <a
                     href={project.githubUrl}
                     onClick={(e) => e.stopPropagation()}
-                    className="flex items-center space-x-1 text-slate-600 hover:text-slate-800"
+                    className="flex items-center space-x-1 text-slate-600 hover:text-slate-300"
                   >
                     <Github className="h-4 w-4" />
                     <span>GitHub</span>
@@ -95,7 +95,7 @@ export function PortfolioSuggestions({ projects, jobDescription, onNext }: Portf
                   <a
                     href={project.liveUrl}
                     onClick={(e) => e.stopPropagation()}
-                    className="flex items-center space-x-1 text-slate-600 hover:text-slate-800"
+                    className="flex items-center space-x-1 text-slate-600 hover:text-slate-300"
                   >
                     <ExternalLink className="h-4 w-4" />
                     <span>Live Demo</span>
@@ -138,7 +138,7 @@ export function PortfolioSuggestions({ projects, jobDescription, onNext }: Portf
       <div className="flex justify-end">
         <button
           onClick={onNext}
-          className="flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center space-x-2 px-6 py-3 bg-blue-600 text-slate-900 rounded-lg hover:bg-blue-700 transition-colors"
         >
           <span>Export & Finalize</span>
           <ArrowRight className="h-4 w-4" />

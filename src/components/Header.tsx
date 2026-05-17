@@ -22,7 +22,7 @@ export function Header() {
               <FileText className="h-4 w-4" />
               <span>ATS Optimized</span>
             </div>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button className="px-4 py-2 bg-blue-600 text-slate-900 rounded-lg hover:bg-blue-700 transition-colors">
               Sign In
             </button>
           </div>

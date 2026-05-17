@@ -228,8 +228,16 @@ OUTPUT FORMAT:
 Write the COMPLETE rewritten resume in clean Markdown. Nothing else -- no explanations, no preamble.
 At the very end of the resume, append these two metadata lines:
 
-MATCH_SCORE: [integer 0-100]
+MATCH_SCORE: [integer 0-100 calculated mathematically using the Industry-Standard ATS Weighted System below]
 CHANGES: [what you changed 1] | [what you changed 2] | [what you changed 3]
+
+INDUSTRY-STANDARD ATS WEIGHTED SYSTEM FOR MATCH_SCORE:
+Calculate the final score out of 100 mathematically by summing these four components:
+1. Keyword Match (40% weight): How closely the candidate's technical skills and tools match the core requirements of the job description.
+2. Layout & Parsability (30% weight): Structural consistency, clean headings, standard section naming, and easily-parsable bullet points.
+3. Quantifiable Accomplishments (20% weight): Percentage of experience bullet points that incorporate specific, measurable metrics (percentages, money, time, numbers).
+4. Active Verbs & Impact (10% weight): Commencing bullet points with strong, industry-standard active verbs (e.g. Led, Developed, Architected, Optimized) instead of passive phrasing.
+State this score exactly as: MATCH_SCORE: [calculated score]
 
 RESUME STRUCTURE (use exactly this format):
 
@@ -274,37 +282,81 @@ RULES:
 7. Do NOT just summarize -- write the complete document ready for PDF export
 8. Keep each bullet to 1-2 lines max for clean formatting"""
 
+    GENERAL_REVIEW_SYSTEM_PROMPT = """You are a professional resume writer and ATS optimization expert.
+
+YOUR TASK: Evaluate the candidate's ENTIRE resume against general tech industry ATS best practices. Rewrite the resume to improve its impact, action verbs, and structure.
+
+OUTPUT FORMAT:
+Write the COMPLETE rewritten resume in clean Markdown. Nothing else.
+At the very end of the resume, append these two metadata lines:
+
+MATCH_SCORE: [integer 0-100 calculated mathematically using the Industry-Standard ATS Weighted System below]
+CHANGES: [what you changed 1] | [what you changed 2] | [what you changed 3]
+
+INDUSTRY-STANDARD ATS WEIGHTED SYSTEM FOR MATCH_SCORE:
+Calculate the final score out of 100 mathematically by summing these four components:
+1. Keyword Match (40% weight): Alignment of technical and domain skills to general professional roles in their sector.
+2. Layout & Parsability (30% weight): Structural consistency, clean headings, standard section naming, and easily-parsable layouts.
+3. Quantifiable Accomplishments (20% weight): Incorportation of percentages, metrics, time frames, and numerical results in bullets.
+4. Active Verbs & Impact (10% weight): Starting sentences with strong active verbs (Architected, Designed, Decreased) rather than passive "responsible for" lists.
+State this score exactly as: MATCH_SCORE: [calculated score]
+
+RESUME STRUCTURE (use exactly this format):
+
+# [Full Name]
+[email] | [phone] | [city, state] | [linkedin]
+
+## Professional Summary
+[2-3 impactful sentences summarizing expertise and career trajectory]
+
+## Technical Skills
+[Comma-separated tech skills]
+
+## Professional Experience
+### [Job Title] | [Company Name]
+[Start - End] | [Location]
+- [Rewritten bullet: action verb + achievement + metrics/impact]
+
+## Education
+### [Degree] | [University]
+[Year]
+
+## Projects (if in original)
+### [Project Name]
+- [Description with tech stack]
+
+RULES:
+1. Rewrite the FULL resume -- every section, every job, every bullet point
+2. Improve weak bullet points using strong action verbs (Architected, Spearheaded, Optimized) and quantifying achievements.
+3. Fix any structural or formatting inconsistencies.
+4. Do NOT invent experiences or skills not present in the original.
+5. Do NOT skip any jobs from the original resume.
+6. Keep each bullet to 1-2 lines max for clean formatting."""
+
     def tailor_resume(self, resume_text: str, job_text: str) -> Dict:
-        """Rewrite the entire resume tailored to the job description."""
+        """Rewrite the entire resume tailored to the job description, or perform a general review if no job is provided."""
         print(f"=== TAILORING RESUME ===")
         print(f"Resume: {len(resume_text)} chars | Job: {len(job_text)} chars | Provider: {self.provider}")
 
         resume_compact = self._compress_whitespace(self._truncate(resume_text, 5000))
-        job_compact = self._compress_whitespace(self._truncate(job_text, 2500))
-
-        user_prompt = f"""Here is the candidate's current resume:
-
-{resume_compact}
-
----
-
-Here is the target job description:
-
-{job_compact}
-
----
-
-Now rewrite the COMPLETE resume tailored to this job. Output the full Markdown resume followed by MATCH_SCORE and CHANGES lines."""
+        
+        if job_text.strip():
+            job_compact = self._compress_whitespace(self._truncate(job_text, 2500))
+            system_prompt = self.TAILOR_SYSTEM_PROMPT
+            user_prompt = f"Here is the candidate's current resume:\n\n{resume_compact}\n\n---\n\nHere is the target job description:\n\n{job_compact}\n\n---\n\nNow rewrite the COMPLETE resume tailored to this job. Output the full Markdown resume followed by MATCH_SCORE and CHANGES lines."
+        else:
+            system_prompt = self.GENERAL_REVIEW_SYSTEM_PROMPT
+            user_prompt = f"Here is the candidate's current resume:\n\n{resume_compact}\n\n---\n\nPerform a general ATS optimization and rewrite the COMPLETE resume. Output the full Markdown resume followed by MATCH_SCORE and CHANGES lines."
 
         raw_output = ""
 
         if self.provider == 'openai':
-            raw_output = self._call_openai_text(self.TAILOR_SYSTEM_PROMPT, user_prompt, max_tokens=4000)
+            raw_output = self._call_openai_text(system_prompt, user_prompt, max_tokens=4000)
 
         elif self.provider == 'gemini':
             try:
                 response = self.gemini_model.generate_content(
-                    f"{self.TAILOR_SYSTEM_PROMPT}\n\n{user_prompt}"
+                    f"{system_prompt}\n\n{user_prompt}"
                 )
                 raw_output = response.text or ""
             except Exception as e:
@@ -312,7 +364,7 @@ Now rewrite the COMPLETE resume tailored to this job. Output the full Markdown r
 
         elif self.provider == 'ollama':
             messages = [
-                {"role": "system", "content": self.TAILOR_SYSTEM_PROMPT},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ]
             raw_output = self._call_ollama(messages)
@@ -395,24 +447,33 @@ Now rewrite the COMPLETE resume tailored to this job. Output the full Markdown r
             "API", "Cloud", "Machine Learning", "Data", "Testing", "DevOps",
             "Communication", "Collaboration", "Problem Solving"
         ]
-        job_lower = job_text.lower()
         resume_lower = resume_text.lower()
-
-        job_keywords = [k for k in common_keywords if k.lower() in job_lower]
-        matched = [k for k in job_keywords if k.lower() in resume_lower]
-        missing = [k for k in job_keywords if k.lower() not in resume_lower]
-
-        if job_keywords:
-            match_score = int((len(matched) / len(job_keywords)) * 100)
-        else:
-            match_score = 50
-        match_score = max(10, min(match_score, 95))
-
         changes = []
-        if matched:
-            changes.append(f"Matched keywords: {', '.join(matched)}")
-        if missing:
-            changes.append(f"Missing from resume: {', '.join(missing)}")
+        
+        if job_text.strip():
+            job_lower = job_text.lower()
+            job_keywords = [k for k in common_keywords if k.lower() in job_lower]
+            matched = [k for k in job_keywords if k.lower() in resume_lower]
+            missing = [k for k in job_keywords if k.lower() not in resume_lower]
+
+            if job_keywords:
+                match_score = int((len(matched) / len(job_keywords)) * 100)
+            else:
+                match_score = 50
+                
+            if matched:
+                changes.append(f"Matched keywords: {', '.join(matched)}")
+            if missing:
+                changes.append(f"Missing from resume: {', '.join(missing)}")
+        else:
+            matched = [k for k in common_keywords if k.lower() in resume_lower]
+            match_score = int(min(100, (len(matched) / 10) * 100))
+            if matched:
+                changes.append(f"Detected core skills: {', '.join(matched[:5])}")
+            changes.append("Optimized structure for general ATS scanning")
+            missing = []
+
+        match_score = max(10, min(match_score, 95))
         changes.append("Restructured into clean Markdown sections")
 
         # Build structured markdown from raw resume text

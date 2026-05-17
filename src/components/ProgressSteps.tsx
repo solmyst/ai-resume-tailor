@@ -27,10 +27,10 @@ export function ProgressSteps({ steps, currentStep }: ProgressStepsProps) {
                 <div className={`
                   flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all
                   ${isCompleted 
-                    ? 'bg-green-600 border-green-600 text-white' 
+                    ? 'bg-green-600 border-green-600 text-slate-900' 
                     : isActive 
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'border-slate-300 text-slate-400 bg-white'
+                    ? 'bg-blue-600 border-blue-600 text-slate-900'
+                    : 'border-slate-300 text-slate-600 bg-white'
                   }
                 `}>
                   {isCompleted ? (

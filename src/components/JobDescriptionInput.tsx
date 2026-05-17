@@ -95,7 +95,7 @@ Preferred:
             onClick={() => setInputMode('paste')}
             className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
               inputMode === 'paste'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-blue-600 text-slate-900'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -106,7 +106,7 @@ Preferred:
             onClick={() => setInputMode('url')}
             className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
               inputMode === 'url'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-blue-600 text-slate-900'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -130,7 +130,7 @@ Preferred:
               />
               <button
                 onClick={handleUrlImport}
-                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
+                className="px-4 py-2 bg-slate-600 text-slate-900 rounded-lg hover:bg-slate-700 transition-colors"
               >
                 Import
               </button>
@@ -180,7 +180,7 @@ Preferred:
         className={`w-full flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${
           !jobText.trim() || isProcessing
             ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-            : 'bg-blue-600 text-white hover:bg-blue-700 transform hover:scale-[1.02]'
+            : 'bg-blue-600 text-slate-900 hover:bg-blue-700 transform hover:scale-[1.02]'
         }`}
       >
         {isProcessing ? (

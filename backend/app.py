@@ -217,8 +217,8 @@ def tailor_resume():
         job_text = data.get('job_description', '')
         user_id = data.get('userId', 'guest')
         
-        if not resume_text or not job_text:
-            return jsonify({'error': 'Resume and Job Description are required'}), 400
+        if not resume_text:
+            return jsonify({'error': 'Resume is required'}), 400
             
         # Tailor with AI
         result = ai_service.tailor_resume(resume_text, job_text)

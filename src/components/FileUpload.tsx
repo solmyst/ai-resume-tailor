@@ -117,7 +117,7 @@ SKILLS
           </div>
         ) : (
           <div className="flex flex-col items-center">
-            <Upload className="h-16 w-16 text-slate-400 mb-4" />
+            <Upload className="h-16 w-16 text-slate-600 mb-4" />
             <p className="text-xl font-medium text-slate-700 mb-2">
               Drag and drop your resume here
             </p>
@@ -129,7 +129,7 @@ SKILLS
                 onChange={handleFileSelect}
                 className="hidden"
               />
-              <span className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+              <span className="inline-flex items-center px-6 py-3 bg-blue-600 text-slate-900 font-medium rounded-lg hover:bg-blue-700 transition-colors">
                 <FileText className="h-5 w-5 mr-2" />
                 Browse Files
               </span>
