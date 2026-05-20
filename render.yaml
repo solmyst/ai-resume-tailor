@@ -1,27 +1,16 @@
 services:
-  # 🧠 Python Backend Web Service
+  # 🧠 Backend API Service (Node.js environment with Python backend)
   - type: web
-    name: ai-resume-tailor-backend
-    env: python
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: gunicorn --chdir backend --bind 0.0.0.0:$PORT app:app
+    name: ai-resume-tailor
+    env: node
+    buildCommand: npm install && npm run render-build
+    startCommand: npm run start
     envVars:
       - key: PORT
-        value: 10000
+        value: 5000
       - key: FLASK_ENV
         value: production
       - key: FLASK_DEBUG
         value: "false"
-
-  # 💻 React Static Frontend
-  - type: web
-    name: ai-resume-tailor-frontend
-    env: static
-    buildCommand: npm install && npm run build
-    publishPath: dist
-    envVars:
-      - key: VITE_API_URL
-        fromService:
-          type: web
-          name: ai-resume-tailor-backend
-          property: host
+      - key: PYTHON_VERSION
+        value: "3.11.0"
