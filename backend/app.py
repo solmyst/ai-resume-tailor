@@ -1,6 +1,12 @@
+import sys
+import os
+# Ensure the backend directory is in the Python path for import resolution (useful for Gunicorn deployments)
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
+
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
-import os
 from typing import Dict, List
 import PyPDF2
 import docx

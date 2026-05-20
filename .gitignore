@@ -60,4 +60,6 @@ backend/instance/test_chroma_db/
 backend/instance/*.db-journal
 backend/instance/*.db-shm
 backend/instance/*.db-wal
+instance/
+
 

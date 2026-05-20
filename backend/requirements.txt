@@ -11,3 +11,4 @@ beautifulsoup4
 requests
 reportlab
 chromadb
+gunicorn
