@@ -243,6 +243,24 @@ npm run dev
 
 ---
 
+## 🌐 Deployment (Render)
+
+This application is fully optimized for production deployment on **Render**.
+
+### Backend Port Binding
+The backend Flask server automatically respects Render's dynamic host and port mapping:
+- Reads the environment `PORT` variable.
+- Binds to host `0.0.0.0` to receive inbound HTTP traffic forwarded by Render.
+- Gracefully falls back to local port `5000` when the `PORT` environment variable is not defined, keeping local environments working out-of-the-box.
+
+### Production Runner
+A `Procfile` is pre-configured at the root of the workspace to launch the app using Gunicorn:
+```bash
+web: gunicorn --bind 0.0.0.0:$PORT backend.app:app
+```
+
+---
+
 ## 🧪 Testing
 
 The backend includes E2E and unit test suites for API and database validation:
