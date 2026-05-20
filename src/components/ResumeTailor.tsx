@@ -73,7 +73,7 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
           body: JSON.stringify({ job_url: jobUrl })
         });
       } catch {
-        throw new Error('Cannot connect to the backend server. Please verify the Python backend is running locally on port 5000 and your network connection is stable.');
+        throw new Error('Cannot connect to the backend server. The server may be starting up — please wait a moment and try again.');
       }
 
       if (!response.ok) throw new Error('We were unable to extract the job description from the provided URL. Please make sure the link is correct and publicly accessible, or copy-paste the text manually.');
@@ -108,7 +108,7 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
           body: formData,
         });
       } catch {
-        throw new Error('Cannot connect to the backend server. Make sure the Python Flask app is running locally on port 5000.');
+        throw new Error('Cannot connect to the backend server. The server may be starting up — please wait a moment and try again.');
       }
 
       if (!response.ok) {
@@ -162,7 +162,7 @@ export const ResumeTailor: React.FC<ResumeTailorProps> = ({ user, onBack }) => {
           }),
         });
       } catch {
-        throw new Error('Cannot connect to the backend server. Please verify the Python application is running on port 5000.');
+        throw new Error('Cannot connect to the backend server. The server may be starting up — please wait a moment and try again.');
       }
 
       if (!response.ok) {
