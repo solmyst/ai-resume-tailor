@@ -5,14 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run install-backend && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "deploy": "npm run build && gh-pages -d dist",
-    "backend": "cd backend && python app.py",
-    "setup-backend": "cd backend && python setup.py",
+    "backend": "cd backend && (python3 app.py || python app.py)",
+    "setup-backend": "cd backend && (python3 setup.py || python setup.py)",
     "start": "concurrently \"npm run dev\" \"npm run backend\"",
-    "install-backend": "cd backend && pip install -r requirements.txt"
+    "install-backend": "cd backend && (pip install -r requirements.txt || pip3 install -r requirements.txt || python -m pip install -r requirements.txt || python3 -m pip install -r requirements.txt || echo 'Warning: Flask requirements could not be installed')"
   },
   "dependencies": {
     "concurrently": "^8.2.2",
