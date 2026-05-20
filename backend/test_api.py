@@ -3,8 +3,21 @@
 Test script for Resume Tailor API
 """
 
+import sys
+import io
 import requests
 import json
+
+# Configure encoding for Windows terminals
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+else:
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except AttributeError:
+        pass
 
 BASE_URL = "http://localhost:5000"
 

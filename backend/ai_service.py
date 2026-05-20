@@ -192,6 +192,70 @@ class AIService:
         text = re.sub(r'[ \t]+', ' ', text)
         return text.strip()
 
+    def validate_resume_format(self, text: str) -> (bool, str):
+        """
+        Validates if the provided text block actually resembles a professional resume.
+        Returns a tuple of (is_resume: bool, warning_message: str).
+        """
+        if not text or not isinstance(text, str):
+            return False, "Empty or invalid document text."
+
+        text_clean = text.strip()
+        if len(text_clean) < 250:
+            return False, f"The uploaded document is too short ({len(text_clean)} characters) to be a valid resume. A typical resume should contain contact information, work history, and skills."
+
+        # Search for standard resume section indicators
+        # Use regex with word boundary matching for high accuracy
+        has_experience = bool(re.search(
+            r'\b(experience|employment|work history|career history|positions held|professional experience|professional background|work experience)\b',
+            text_clean, re.IGNORECASE
+        ))
+
+        has_education = bool(re.search(
+            r'\b(education|academic|university|college|degree|degrees|credentials|certifications)\b',
+            text_clean, re.IGNORECASE
+        ))
+
+        has_skills = bool(re.search(
+            r'\b(skills|technical skills|technologies|proficiencies|core competencies|areas of expertise|languages)\b',
+            text_clean, re.IGNORECASE
+        ))
+
+        has_summary = bool(re.search(
+            r'\b(summary|objective|profile|professional summary|about me|executive summary)\b',
+            text_clean, re.IGNORECASE
+        ))
+
+        # Check for contact indicators (e.g., an email address)
+        has_email = bool(re.search(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text_clean))
+        
+        # Check for phone indicators (e.g. sequence of numbers that looks like a phone number)
+        has_phone = bool(re.search(r'(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}', text_clean))
+
+        # Calculate a structural completeness score
+        structural_matches = sum([has_experience, has_education, has_skills, has_summary])
+        has_contact_details = has_email or has_phone
+
+        # A document MUST have either a Work Experience or Education section,
+        # and at least two structural sections in total, or a structural section and contact details.
+        is_valid_structure = (has_experience or has_education) and (structural_matches >= 2 or (structural_matches >= 1 and has_contact_details))
+
+        if not is_valid_structure:
+            issues = []
+            if not has_experience:
+                issues.append("Missing a Professional Experience / Work History section.")
+            if not has_education:
+                issues.append("Missing an Education / Academic Background section.")
+            if not has_skills and not has_summary:
+                issues.append("Missing a Technical Skills or Professional Summary section.")
+            if not has_contact_details:
+                issues.append("Missing standard contact details (like a professional email address or phone number).")
+
+            warning = "The document does not look like a professional resume. Issues detected:\n" + "\n".join([f"- {issue}" for issue in issues])
+            return False, warning
+
+        return True, ""
+
     # =================================================
     # API: analyze_job
     # =================================================
@@ -333,17 +397,42 @@ RULES:
 5. Do NOT skip any jobs from the original resume.
 6. Keep each bullet to 1-2 lines max for clean formatting."""
 
-    def tailor_resume(self, resume_text: str, job_text: str) -> Dict:
+    def tailor_resume(self, resume_text: str, job_text: str, retrieved_context: str = "") -> Dict:
         """Rewrite the entire resume tailored to the job description, or perform a general review if no job is provided."""
         print(f"=== TAILORING RESUME ===")
         print(f"Resume: {len(resume_text)} chars | Job: {len(job_text)} chars | Provider: {self.provider}")
+
+        # Validate if document resembles a resume before processing
+        is_resume, warning = self.validate_resume_format(resume_text)
+        if not is_resume:
+            print(f"[WARN] Uploaded document failed resume format validation: {warning.splitlines()[0]}")
+            formatted_issues = warning.replace("The document does not look like a professional resume. Issues detected:\n", "")
+            tailored_warning = (
+                f"# ⚠️ Document Validation Warning\n\n"
+                f"The document you uploaded does not appear to be a professional resume. "
+                f"Please review the structural issues detected below and upload a standard resume containing professional sections.\n\n"
+                f"### 📋 Detected Structural Issues:\n"
+                f"{formatted_issues}\n\n"
+                f"### 💡 Why this is important for your ATS Score:\n"
+                f"Applicant Tracking Systems (ATS) and recruiters expect a structured layout containing a chronological career path, "
+                f"academic background, and a technical skills matrix. Without these standard segments, parsing engines cannot index your qualifications.\n\n"
+                f"**Please upload a document with a standard resume layout to tailored results successfully.**"
+            )
+            return {
+                "tailored_text": tailored_warning,
+                "changes_made": ["Flagged invalid resume structure", "Low parsing completeness"],
+                "match_score": 10  # Low score due to missing standard sections
+            }
 
         resume_compact = self._compress_whitespace(self._truncate(resume_text, 5000))
         
         if job_text.strip():
             job_compact = self._compress_whitespace(self._truncate(job_text, 2500))
             system_prompt = self.TAILOR_SYSTEM_PROMPT
-            user_prompt = f"Here is the candidate's current resume:\n\n{resume_compact}\n\n---\n\nHere is the target job description:\n\n{job_compact}\n\n---\n\nNow rewrite the COMPLETE resume tailored to this job. Output the full Markdown resume followed by MATCH_SCORE and CHANGES lines."
+            user_prompt = f"Here is the candidate's current resume:\n\n{resume_compact}\n\n---\n\nHere is the target job description:\n\n{job_compact}\n\n---\n"
+            if retrieved_context:
+                user_prompt += f"Here are key relevant accomplishments/highlights from the candidate's history that semantically match the job description requirements (use these to heavily align the rewritten experience and skills):\n\n{retrieved_context}\n\n---\n"
+            user_prompt += "Now rewrite the COMPLETE resume tailored to this job. Output the full Markdown resume followed by MATCH_SCORE and CHANGES lines."
         else:
             system_prompt = self.GENERAL_REVIEW_SYSTEM_PROMPT
             user_prompt = f"Here is the candidate's current resume:\n\n{resume_compact}\n\n---\n\nPerform a general ATS optimization and rewrite the COMPLETE resume. Output the full Markdown resume followed by MATCH_SCORE and CHANGES lines."

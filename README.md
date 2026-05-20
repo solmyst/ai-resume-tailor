@@ -14,6 +14,8 @@
 
 ## ✨ Features & Capabilities
 
+- **🧠 Privacy-First Semantic RAG**: Leverages a local vector database (**ChromaDB**) to parse and index uploaded resumes semantically. Dynamically queries and retrieves high-relevance experience blocks to feed context into LLM tailoring prompts.
+- **💼 Semantic Project Matcher**: Computes cosine similarity match scores between candidate portfolio projects and job descriptions, highlighting matching tech-stack alignments.
 - **🎯 Intelligent Resume Tailoring**: Leverages advanced LLMs to rewrite your master resume dynamically, highlighting role-relevant skills, experience, and accomplishments.
 - **📊 ATS Scoring System**: Calculates match scores (0–100) mathematically using a 4-component weighted model:
   1. *Keyword Match (40%):* Alignment of technical tools and domain skills.
@@ -41,6 +43,8 @@ graph TD
     B -->|User/History Queries| C[SQLite Database + SQLAlchemy]
     B -->|Text Extraction| D[PyPDF2 / python-docx]
     B -->|URL Scraper| E[BeautifulSoup4]
+    B -->|RAG / Vector Ops| L[ChromaDB Vector Store]
+    L -->|Offline Embeddings| M[ONNX MiniLM-L6-v2 Engine]
     B -->|Prompt Synthesis| F{AI Service Manager}
     F -->|Cloud LLM| G[OpenAI GPT-4o-mini]
     F -->|Cloud LLM| H[Google Gemini 1.5]
@@ -58,6 +62,8 @@ graph TD
 ### Backend
 - **Framework**: Flask (Python) with Flask-CORS
 - **Database ORM**: SQLite with Flask-SQLAlchemy (Declarative Base structure)
+- **Vector Database**: **ChromaDB** (Persistent vector client for local semantic indexing)
+- **Embedding Model**: ONNX Runtime-powered local `all-MiniLM-L6-v2` (Zero-cost, fully offline)
 - **Document Extractors**: PyPDF2 (PDFs), python-docx (Word documents)
 - **Scraper**: BeautifulSoup4 + requests
 - **PDF Engine**: ReportLab (SimpleDocTemplate with custom paragraph styling and HRFlowable layout)
@@ -69,7 +75,7 @@ graph TD
 
 ```text
 ├── backend/
-│   ├── instance/               # SQLite database location (resume_tailor.db)
+│   ├── instance/               # Database files (SQLite + persistent ChromaDB vector store)
 │   ├── ai_service.py           # Multi-provider LLM connector (OpenAI, Gemini, Ollama, Mock)
 │   ├── app.py                  # Flask REST API endpoints and web server
 │   ├── database.py             # SQLAlchemy instance and database initializer
@@ -78,7 +84,9 @@ graph TD
 │   ├── resume_generator.py     # Markdown-to-PDF formatting engine using ReportLab
 │   ├── setup.py                # Automated installation and environment initialization script
 │   ├── test_api.py             # API endpoint integration test suite
-│   └── test_backend.py         # Mock-data end-to-end backend test script
+│   ├── test_backend.py         # Mock-data end-to-end backend test script
+│   ├── test_chromadb.py        # Vector Store ChromaDB unit tests
+│   └── vector_store.py         # Persistent vector store and chunking logic
 ├── src/
 │   ├── components/
 │   │   ├── Analytics.tsx       # UI panel for tracking match score analytics
@@ -237,14 +245,19 @@ npm run dev
 
 ## 🧪 Testing
 
-The backend includes E2E test suites for API validation:
+The backend includes E2E and unit test suites for API and database validation:
 
-1. **E2E API Test**:
+1. **Vector Store Unit Test**:
+   ```bash
+   cd backend
+   python test_chromadb.py
+   ```
+2. **E2E API Test**:
    ```bash
    cd backend
    python test_api.py
    ```
-2. **Mock-Data Flow Integration Test**:
+3. **Mock-Data Flow Integration Test**:
    ```bash
    cd backend
    python test_backend.py

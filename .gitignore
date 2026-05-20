@@ -53,3 +53,11 @@ wheels/
 venv/
 env/
 ENV/
+
+# Local databases and vector stores
+backend/instance/chroma_db/
+backend/instance/test_chroma_db/
+backend/instance/*.db-journal
+backend/instance/*.db-shm
+backend/instance/*.db-wal
+
