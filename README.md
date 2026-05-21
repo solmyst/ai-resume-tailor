@@ -32,6 +32,8 @@
 - **📊 Interactive Glassmorphism Dashboard**: Monitor your resume history, calculate average match scores, track applications, and view recent activities.
 - **🔑 Dynamic API Key Management**: Swappable OpenAI key settings validated directly from the UI.
 - **🔒 Secure Local-First Data**: Hashed user passwords, local SQLite database storage, and private document processing.
+- **🧪 Comprehensive Test Coverage**: 86 robust unit tests built with **Vitest** and **React Testing Library** validating the ATS scoring engine, file uploads, and API integration.
+- **🚀 Automated CI/CD Pipeline**: 5-stage **GitHub Actions** workflow covering linting, testing, building, and automated deployment to GitHub Pages.
 
 ---
 
@@ -243,27 +245,54 @@ npm run dev
 
 ---
 
-## 🌐 Deployment (Render)
+## 🌐 Deployment (Render & GitHub Pages)
 
-This application is fully optimized for production deployment on **Render**.
+This application is fully optimized for a split production deployment: Frontend on **GitHub Pages** and Backend on **Render**.
 
-### Backend Port Binding
+### Frontend Deployment
+- Uses `npm run deploy` to build the production bundle and push to the `gh-pages` branch.
+- Configured via Vite with `base` path handling.
+- Environment variables (`VITE_API_URL`) securely point to the live Render backend.
+
+### Backend Port Binding & Render Setup
 The backend Flask server automatically respects Render's dynamic host and port mapping:
 - Reads the environment `PORT` variable.
 - Binds to host `0.0.0.0` to receive inbound HTTP traffic forwarded by Render.
-- Gracefully falls back to local port `5000` when the `PORT` environment variable is not defined, keeping local environments working out-of-the-box.
+- Gracefully falls back to local port `5000` when the `PORT` environment variable is not defined.
+- Uses a custom `render-build` script to install Python dependencies inside an isolated virtual environment (`venv`).
 
 ### Production Runner
 A `Procfile` is pre-configured at the root of the workspace to launch the app using Gunicorn:
 ```bash
-web: gunicorn --bind 0.0.0.0:$PORT backend.app:app
+web: backend/venv/bin/gunicorn --bind 0.0.0.0:$PORT backend.app:app
 ```
 
 ---
 
-## 🧪 Testing
+## 🧪 Testing & CI/CD
 
-The backend includes E2E and unit test suites for API and database validation:
+The project features comprehensive automated testing and a full CI/CD pipeline using **GitHub Actions**.
+
+### CI/CD Pipeline
+Every push to `main` or `develop` triggers a 5-stage GitHub Actions workflow:
+1. **Lint & Type Check**: Runs ESLint and TypeScript validation.
+2. **Frontend Tests**: Executes the Vitest suite.
+3. **Backend Tests**: Executes the Pytest suite.
+4. **Build Verification**: Ensures the Vite build succeeds and generates assets.
+5. **Auto-Deploy**: Deploys the frontend to GitHub Pages (on `main` branch pushes only).
+
+### Frontend Testing (Vitest)
+Contains 86 tests across 10 suites validating everything from the 4-component ATS scoring engine to UI navigation.
+```bash
+# Run frontend tests
+npm run test
+
+# Run with coverage
+npm run test:coverage
+```
+
+### Backend Testing (Pytest)
+Includes E2E and unit test suites for API and database validation:
 
 1. **Vector Store Unit Test**:
    ```bash
