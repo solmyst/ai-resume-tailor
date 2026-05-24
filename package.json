@@ -12,12 +12,12 @@
     "test:coverage": "vitest run --coverage",
     "preview": "vite preview",
     "deploy": "npm run build && gh-pages -d dist",
-    "backend": "cd backend && (venv/bin/python app.py || venv/bin/python3 app.py || venv/Scripts/python app.py || python3 app.py || python app.py)",
-    "setup-backend": "cd backend && (venv/bin/python setup.py || venv/bin/python3 setup.py || venv/Scripts/python setup.py || python3 setup.py || python setup.py)",
-    "start": "cd backend && (venv/bin/python app.py || venv/bin/python3 app.py || venv/Scripts/python app.py || python3 app.py || python app.py)",
+    "backend": "cd backend && (venv\\Scripts\\python app.py || venv/bin/python app.py || venv/bin/python3 app.py || venv/Scripts/python app.py || python3 app.py || python app.py)",
+    "setup-backend": "cd backend && (venv\\Scripts\\python setup.py || venv/bin/python setup.py || venv/bin/python3 setup.py || venv/Scripts/python setup.py || python3 setup.py || python setup.py)",
+    "start": "cd backend && (venv\\Scripts\\python app.py || venv/bin/python app.py || venv/bin/python3 app.py || venv/Scripts/python app.py || python3 app.py || python app.py)",
     "start:dev": "concurrently \"npm run dev\" \"npm run backend\"",
     "render-build": "npm run install-backend",
-    "install-backend": "cd backend && (python3 -m venv venv || python -m venv venv || echo 'No venv support') && (venv/bin/pip install -r requirements.txt || venv/bin/pip3 install -r requirements.txt || venv\\Scripts\\pip install -r requirements.txt || pip install -r requirements.txt || pip3 install -r requirements.txt || echo 'Warning: Flask requirements could not be installed')"
+    "install-backend": "cd backend && (python3 -m venv venv || python -m venv venv || echo 'No venv support') && (venv\\Scripts\\pip install -r requirements.txt || venv/bin/pip install -r requirements.txt || venv/bin/pip3 install -r requirements.txt || pip install -r requirements.txt || pip3 install -r requirements.txt || echo 'Warning: Flask requirements could not be installed')"
   },
   "dependencies": {
     "concurrently": "^8.2.2",

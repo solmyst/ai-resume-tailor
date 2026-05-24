@@ -23,6 +23,13 @@ class AIService:
         self.available_models = []
         self.openai_client = None
 
+        self.GEMINI_SAFETY_SETTINGS = [
+            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+        ]
+
         self._init_providers()
         print(f"AI Service initialized with provider: {self.provider}")
 
@@ -31,7 +38,7 @@ class AIService:
         if self.openai_key and self.openai_key != 'your_openai_api_key_here':
             try:
                 self.openai_client = OpenAI(api_key=self.openai_key)
-                self.openai_client.models.list()
+                self.openai_client.models.list(timeout=5.0)
                 self.provider = 'openai'
                 print("[OK] OpenAI connected successfully")
                 return
@@ -42,7 +49,10 @@ class AIService:
         if HAS_GEMINI and self.gemini_key:
             try:
                 genai.configure(api_key=self.gemini_key)
-                self.gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+                self.gemini_model = genai.GenerativeModel(
+                    'gemini-1.5-flash',
+                    system_instruction="You are a professional resume writer and ATS optimization expert."
+                )
                 self.provider = 'gemini'
                 print("[OK] Gemini connected successfully")
                 return
@@ -64,7 +74,7 @@ class AIService:
             return False
         try:
             client = OpenAI(api_key=key)
-            client.models.list()
+            client.models.list(timeout=5.0)
             self.openai_key = key
             self.openai_client = client
             self.provider = 'openai'
@@ -79,9 +89,23 @@ class AIService:
     # OpenAI callers
     # -------------------------------------------------
 
-    def _call_openai_json(self, system_prompt: str, user_prompt: str, max_tokens: int = 500) -> str:
+    def _check_moderation(self, text: str) -> bool:
+        """Return True if content is safe (not flagged), False otherwise."""
+        if not self.openai_client:
+            return True
+        try:
+            response = self.openai_client.moderations.create(input=text)
+            return not response.results[0].flagged
+        except Exception as e:
+            print(f"Moderation check failed: {e}")
+            return True
+
+    def _call_openai_json(self, system_prompt: str, user_prompt: str, max_tokens: int = 500, user_id: str = "resume_tailor_user") -> str:
         """Call OpenAI with JSON mode -- for small structured responses (job analysis)."""
         if not self.openai_client:
+            return ""
+        if not self._check_moderation(user_prompt):
+            print("Content flagged by OpenAI moderation API")
             return ""
         try:
             response = self.openai_client.chat.completions.create(
@@ -92,17 +116,25 @@ class AIService:
                 ],
                 temperature=0.2,
                 max_tokens=max_tokens,
-                response_format={"type": "json_object"}
+                response_format={"type": "json_object"},
+                user=user_id
             )
-            return response.choices[0].message.content or ""
+            message = response.choices[0].message
+            if getattr(message, 'refusal', None):
+                print(f"OpenAI request refused: {message.refusal}")
+                return ""
+            return message.content or ""
         except Exception as e:
             print(f"OpenAI JSON call error: {e}")
             return ""
 
-    def _call_openai_text(self, system_prompt: str, user_prompt: str, max_tokens: int = 4000) -> str:
+    def _call_openai_text(self, system_prompt: str, user_prompt: str, max_tokens: int = 4000, user_id: str = "resume_tailor_user") -> str:
         """Call OpenAI in plain text mode -- for full resume rewriting.
         No JSON constraint so the model outputs the complete resume without compression."""
         if not self.openai_client:
+            return ""
+        if not self._check_moderation(user_prompt):
+            print("Content flagged by OpenAI moderation API")
             return ""
         try:
             response = self.openai_client.chat.completions.create(
@@ -112,9 +144,14 @@ class AIService:
                     {"role": "user", "content": user_prompt}
                 ],
                 temperature=0.3,
-                max_tokens=max_tokens
+                max_tokens=max_tokens,
+                user=user_id
             )
-            content = response.choices[0].message.content or ""
+            message = response.choices[0].message
+            if getattr(message, 'refusal', None):
+                print(f"OpenAI request refused: {message.refusal}")
+                return ""
+            content = message.content or ""
             tokens_used = response.usage.total_tokens if response.usage else 0
             print(f"[OpenAI] Resume rewrite complete. Tokens: {tokens_used}, Output: {len(content)} chars")
             return content
@@ -260,7 +297,7 @@ class AIService:
     # API: analyze_job
     # =================================================
 
-    def analyze_job(self, job_text: str) -> Dict:
+    def analyze_job(self, job_text: str, user_id: str = "resume_tailor_user") -> Dict:
         print(f"Analyzing job ({len(job_text)} chars)...")
         job_compact = self._compress_whitespace(self._truncate(job_text, 2500))
 
@@ -268,7 +305,7 @@ class AIService:
         user = f"Extract: role, company, required_skills (max 8), key_phrases (max 4), summary (1 sentence).\n\nJob:\n{job_compact}"
 
         if self.provider == 'openai':
-            raw = self._call_openai_json(system, user, max_tokens=400)
+            raw = self._call_openai_json(system, user, max_tokens=400, user_id=user_id)
             result = self._parse_ai_json(raw)
             return result if result else self._mock_analyze_job(job_text)
         elif self.provider == 'gemini':
@@ -397,7 +434,7 @@ RULES:
 5. Do NOT skip any jobs from the original resume.
 6. Keep each bullet to 1-2 lines max for clean formatting."""
 
-    def tailor_resume(self, resume_text: str, job_text: str, retrieved_context: str = "") -> Dict:
+    def tailor_resume(self, resume_text: str, job_text: str, retrieved_context: str = "", user_id: str = "resume_tailor_user") -> Dict:
         """Rewrite the entire resume tailored to the job description, or perform a general review if no job is provided."""
         print(f"=== TAILORING RESUME ===")
         print(f"Resume: {len(resume_text)} chars | Job: {len(job_text)} chars | Provider: {self.provider}")
@@ -445,7 +482,8 @@ RULES:
         elif self.provider == 'gemini':
             try:
                 response = self.gemini_model.generate_content(
-                    f"{system_prompt}\n\n{user_prompt}"
+                    f"{system_prompt}\n\n{user_prompt}",
+                    safety_settings=self.GEMINI_SAFETY_SETTINGS
                 )
                 raw_output = response.text or ""
             except Exception as e:
@@ -506,7 +544,10 @@ RULES:
 
     def _analyze_job_gemini(self, prompt: str) -> Dict:
         try:
-            response = self.gemini_model.generate_content(prompt)
+            response = self.gemini_model.generate_content(
+                prompt,
+                safety_settings=self.GEMINI_SAFETY_SETTINGS
+            )
             return self._parse_ai_json(response.text)
         except Exception as e:
             print(f"Gemini analysis error: {e}")

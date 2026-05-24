@@ -173,11 +173,14 @@ def upload_resume():
         skills_keywords = ['Python', 'Java', 'React', 'Node', 'SQL', 'AWS', 'Docker', 'Kubernetes', 'JavaScript', 'TypeScript', 'HTML', 'CSS']
         extracted_skills = [s for s in skills_keywords if s.lower() in resume_text.lower()]
 
-        # Index the resume in ChromaDB for semantic RAG tailoring
-        try:
-            vector_store.add_resume(user_id, 'current_resume', resume_text, file.filename)
-        except Exception as e:
-            print(f"ChromaDB indexing error: {e}")
+        # Index the resume in ChromaDB in a background thread to prevent blocking the upload response
+        import threading
+        def bg_index():
+            try:
+                vector_store.add_resume(user_id, 'current_resume', resume_text, file.filename)
+            except Exception as e:
+                print(f"ChromaDB indexing error: {e}")
+        threading.Thread(target=bg_index).start()
 
         return jsonify({
             'success': True,
@@ -210,7 +213,8 @@ def analyze_job():
             return jsonify({'error': 'Job description or URL is required'}), 400
         
         # Analyze with AI (or Mock)
-        job_analysis = ai_service.analyze_job(job_text)
+        user_id = data.get('userId', 'guest')
+        job_analysis = ai_service.analyze_job(job_text, user_id=user_id)
         
         return jsonify({
             'success': True,
@@ -250,7 +254,7 @@ def tailor_resume():
                 print(f"ChromaDB retrieval error: {e}")
 
         # Tailor with AI, passing retrieved ChromaDB context
-        result = ai_service.tailor_resume(resume_text, job_text, retrieved_context)
+        result = ai_service.tailor_resume(resume_text, job_text, retrieved_context, user_id=user_id)
         
         # Save activity
         if user_id != 'guest':

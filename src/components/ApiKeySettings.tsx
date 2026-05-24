@@ -90,7 +90,9 @@ export const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ isOpen, onClose 
     unknown: { label: 'Unknown', color: 'text-slate font-bold' },
   };
 
-  const provider = providerLabel[currentProvider] || providerLabel.unknown;
+  const provider = Object.prototype.hasOwnProperty.call(providerLabel, currentProvider)
+    ? providerLabel[currentProvider]
+    : providerLabel.unknown;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">

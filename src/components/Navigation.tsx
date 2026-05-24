@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, BarChart3, LogOut, User, Sparkles, Settings } from 'lucide-react';
 import { ApiKeySettings } from './ApiKeySettings';
+import { API_BASE_URL } from '../config';
 
 interface NavigationProps {
   user: {
@@ -17,6 +18,41 @@ interface NavigationProps {
 
 export const Navigation: React.FC<NavigationProps> = ({ user, currentPage, onNavigate, onLogout }) => {
   const [showSettings, setShowSettings] = useState(false);
+  const [backendStatus, setBackendStatus] = useState<'checking' | 'active' | 'offline'>('checking');
+  const [providerName, setProviderName] = useState<string>('');
+
+  const fetchStatus = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/health`);
+      if (res.ok) {
+        const data = await res.json();
+        setBackendStatus('active');
+        
+        const providerLabels: Record<string, string> = {
+          openai: 'OpenAI GPT-4o-mini',
+          gemini: 'Google Gemini',
+          ollama: 'Ollama (Local)',
+          mock: 'Offline Engine'
+        };
+        
+        const providerLabel = Object.prototype.hasOwnProperty.call(providerLabels, data.ai_provider)
+          ? providerLabels[data.ai_provider]
+          : data.ai_provider || 'Active';
+          
+        setProviderName(providerLabel);
+      } else {
+        setBackendStatus('offline');
+      }
+    } catch {
+      setBackendStatus('offline');
+    }
+  };
+
+  useEffect(() => {
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
@@ -61,6 +97,23 @@ export const Navigation: React.FC<NavigationProps> = ({ user, currentPage, onNav
 
             {/* User Menu */}
             <div className="flex items-center space-x-3">
+              {/* Backend Status Badge */}
+              <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl border border-linen bg-stone font-bold text-[10px] tracking-wide uppercase shadow-[0_1px_3px_rgba(18,18,27,0.01)] select-none">
+                <span className="relative flex h-2 w-2">
+                  {backendStatus === 'active' && (
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  )}
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${
+                    backendStatus === 'active' ? 'bg-emerald-500' :
+                    backendStatus === 'offline' ? 'bg-rose-500' : 'bg-amber-500'
+                  }`}></span>
+                </span>
+                <span className={backendStatus === 'active' ? 'text-ink' : 'text-slate/60'}>
+                  {backendStatus === 'active' ? `${providerName}` :
+                   backendStatus === 'offline' ? 'Offline' : 'Checking...'}
+                </span>
+              </div>
+
               {/* Settings / API Key Button */}
               <button
                 onClick={() => setShowSettings(true)}
@@ -83,23 +136,13 @@ export const Navigation: React.FC<NavigationProps> = ({ user, currentPage, onNav
                   <p className="text-[10px] text-ember font-black uppercase tracking-widest">{user.subscription}</p>
                 </div>
               </div>
-              
-              {/* 
-              <button
-                onClick={onLogout}
-                className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/5 rounded-xl transition-all active:scale-90"
-                title="Logout"
-              >
-                <LogOut className="w-5 h-5" />
-              </button>
-              */}
             </div>
           </div>
         </div>
       </nav>
 
       {/* API Key Settings Modal */}
-      <ApiKeySettings isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      <ApiKeySettings isOpen={showSettings} onClose={() => { setShowSettings(false); fetchStatus(); }} />
     </>
   );
 };
